@@ -25,9 +25,9 @@ Specifically, the scan did not find:
 
 ## Notes
 
-CD Case includes optional Spotify OAuth code. That code can store a user's Spotify Client ID and OAuth tokens in that user's browser storage after they connect Spotify, but the committed HTML file does not contain any actual Spotify credentials.
+CD Case no longer includes Spotify OAuth, Spotify account import, Client ID input, or token exchange code. Visitors do not need Spotify Developer access.
 
-CD Case backup exports were hardened during this pass. They now include album data and Top 3 pins, but exclude Spotify auth data and Client IDs.
+CD Case backup exports include album data and Top 3 pins only.
 
 Do not upload browser-exported backup JSON files unless the saved album list is intentionally public.
 

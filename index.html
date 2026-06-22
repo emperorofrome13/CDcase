@@ -303,37 +303,9 @@
       <input id="link" placeholder="paste an album link from any service…" autocomplete="off" spellcheck="false">
       <button class="btn" id="addBtn">Add</button>
     </div>
-    <button class="btn ghost" id="spotifyBtn">Connect Spotify</button>
   </div>
   <div class="note"><div class="msg" id="msg" hidden></div></div>
 </header>
-
-<div class="setup" id="setup">
-  <details id="setupDetails">
-    <summary><span class="dot"></span> Spotify setup &amp; import <span class="lbl" id="setupState" style="margin-left:auto"></span></summary>
-    <div class="body">
-      <p>To log in and pull your saved albums, this file must be served from a loopback address (Spotify no longer allows <code>localhost</code> or plain web <code>http</code>). One-time setup:</p>
-      <ol>
-        <li>Save this file as <code>index.html</code> in a folder, then in that folder run:
-            <code>python3 -m http.server 8888 --bind 127.0.0.1</code></li>
-        <li>Open <code>http://127.0.0.1:8888/</code> in your browser.</li>
-        <li>At <code>developer.spotify.com/dashboard</code> create an app (Web API), and add this exact Redirect URI:
-            <div class="uriwrap" style="margin-top:6px"><span class="uri" id="redirectUri">—</span>
-              <button class="btn ghost sm" id="copyUri">Copy</button></div></li>
-        <li>Copy the app's <b>Client ID</b> and paste it here:
-            <div class="row"><input class="cid" id="clientId" placeholder="Spotify Client ID" spellcheck="false">
-              <button class="btn sm" id="saveCid">Save ID</button></div></li>
-        <li>Click <b>Connect Spotify</b> up top, approve, then use <b>Import saved albums</b>.</li>
-      </ol>
-      <div class="row">
-        <button class="btn sm" id="importBtnSpotify">Import saved albums</button>
-        <button class="btn ghost sm" id="disconnectBtn">Disconnect</button>
-      </div>
-      <p style="font-size:12px;margin-top:6px">No login needed for the rest of the app — pasting links, pinning, playing and printing all work on their own.</p>
-    </div>
-  </details>
-</div>
-
 
 <div class="workspace">
   <div class="left">
@@ -395,7 +367,7 @@ const KEY="cdcase:v1";
 let useLS=false; try{ localStorage.setItem("__t","1"); localStorage.removeItem("__t"); useLS=true; }catch(e){}
 const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-let state={ albums:[], top3:[], clientId:"", auth:null };
+let state={ albums:[], top3:[] };
 
 function save(){
   const data=JSON.stringify(state);
@@ -408,7 +380,7 @@ async function load(){
   try{ const r=await window.storage.get(KEY); if(r) return JSON.parse(r.value); }catch(e){}
   // migrate from the older Disc Binder build if present
   try{ const old=await window.storage.get("discbinder:albums:v2");
-    if(old){ const arr=JSON.parse(old.value); if(Array.isArray(arr)) return {albums:arr,top3:[],clientId:"",auth:null}; } }catch(e){}
+    if(old){ const arr=JSON.parse(old.value); if(Array.isArray(arr)) return {albums:arr,top3:[]}; } }catch(e){}
   return null;
 }
 
@@ -517,7 +489,7 @@ function renderBinder(){
     let e=document.querySelector(".empty");
     if(!e){ e=document.createElement("div"); e.className="empty";
       e.innerHTML=`<div class="disc-big"></div><h2 class="display">No cases yet</h2>
-        <p>Paste an album link from any service, or connect Spotify to import your saved albums.</p>
+        <p>Paste an album link from any service to start building your crate.</p>
         <div class="hint">Spotify · Apple Music · YouTube Music · Tidal · Deezer · Amazon</div>`;
       $(".spread").appendChild(e); }
     e.style.display="block"; return;
@@ -643,76 +615,6 @@ async function importData(file){
   }catch(e){ flash("Couldn't read that file — use a CD Case export (.json)."); }
 }
 
-/* ---------------- spotify oauth (pkce) ---------------- */
-function redirectUri(){ return location.origin+location.pathname; }
-function b64url(buf){ return btoa(String.fromCharCode(...new Uint8Array(buf))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,''); }
-function randStr(n){ const a=new Uint8Array(n); crypto.getRandomValues(a); return Array.from(a,b=>("0"+b.toString(16)).slice(-2)).join(""); }
-async function sha256(s){ return crypto.subtle.digest("SHA-256", new TextEncoder().encode(s)); }
-function canAuth(){ return location.protocol==="https:" || location.hostname==="127.0.0.1"; }
-
-async function login(){
-  if(!state.clientId){ flash("Add your Spotify Client ID in Setup first."); $("#setupDetails").open=true; return; }
-  if(!canAuth()){ flash("Login needs the page served from http://127.0.0.1 (see Setup)."); $("#setupDetails").open=true; return; }
-  const v=randStr(48), ch=b64url(await sha256(v));
-  try{ sessionStorage.setItem("cdcase_v",v); }catch(e){ flash("Your browser blocked session storage; run it from 127.0.0.1."); return; }
-  const p=new URLSearchParams({client_id:state.clientId,response_type:"code",redirect_uri:redirectUri(),
-    code_challenge_method:"S256",code_challenge:ch,scope:"user-library-read"});
-  location.href="https://accounts.spotify.com/authorize?"+p.toString();
-}
-async function handleRedirect(){
-  const u=new URL(location.href);
-  if(u.searchParams.get("error")){ flash("Spotify login was cancelled."); history.replaceState({},"",redirectUri()); return; }
-  const code=u.searchParams.get("code"); if(!code) return;
-  let v=null; try{ v=sessionStorage.getItem("cdcase_v"); }catch(e){}
-  history.replaceState({},"",redirectUri());
-  if(!v) return;
-  try{
-    const body=new URLSearchParams({grant_type:"authorization_code",code,redirect_uri:redirectUri(),client_id:state.clientId,code_verifier:v});
-    const r=await fetch("https://accounts.spotify.com/api/token",{method:"POST",headers:{"Content-Type":"application/x-www-form-urlencoded"},body});
-    const t=await r.json();
-    if(t.access_token){ state.auth={access:t.access_token,refresh:t.refresh_token||null,expires:Date.now()+t.expires_in*1000}; save(); updateAuthUI(); flash("Connected to Spotify. Use Import saved albums.",true); }
-    else flash("Spotify login failed: "+(t.error_description||t.error||"unknown"));
-  }catch(e){ flash("Spotify token exchange failed."); }
-}
-async function token(){
-  if(!state.auth) return null;
-  if(Date.now()<state.auth.expires-60000) return state.auth.access;
-  if(!state.auth.refresh) return null;
-  try{
-    const body=new URLSearchParams({grant_type:"refresh_token",refresh_token:state.auth.refresh,client_id:state.clientId});
-    const r=await fetch("https://accounts.spotify.com/api/token",{method:"POST",headers:{"Content-Type":"application/x-www-form-urlencoded"},body});
-    const t=await r.json();
-    if(t.access_token){ state.auth.access=t.access_token; state.auth.expires=Date.now()+t.expires_in*1000; if(t.refresh_token) state.auth.refresh=t.refresh_token; save(); return state.auth.access; }
-  }catch(e){}
-  return null;
-}
-async function importSaved(){
-  const tok=await token(); if(!tok){ flash("Connect Spotify first."); $("#setupDetails").open=true; return; }
-  flash("Importing your Spotify library…",true);
-  let url="https://api.spotify.com/v1/me/albums?limit=50", added=0, seen=0;
-  try{
-    while(url){
-      const r=await fetch(url,{headers:{Authorization:"Bearer "+tok}});
-      if(!r.ok){ flash("Spotify import failed ("+r.status+")."); break; }
-      const d=await r.json();
-      (d.items||[]).forEach(it=>{ const al=it.album; if(!al)return; seen++;
-        const link=(al.external_urls&&al.external_urls.spotify)||("https://open.spotify.com/album/"+al.id);
-        const cover=(al.images&&al.images[0]&&al.images[0].url)||"";
-        const artist=(al.artists||[]).map(x=>x.name).join(", ");
-        const o={id:crypto.randomUUID(),title:al.name||"Untitled",artist,cover,links:{spotify:link},pageUrl:link,url:link,added:Date.now()};
-        if(!state.albums.some(a=>dedupeKey(a)===dedupeKey(o))){ state.albums.push(o); added++; } });
-      url=d.next;
-    }
-    save(); renderAll(); flash(`Imported ${added} new album${added===1?"":"s"} (${seen} in your library).`,true);
-  }catch(e){ flash("Couldn't reach Spotify. Make sure you're on http://127.0.0.1."); }
-}
-function updateAuthUI(){
-  const connected=!!(state.auth&&state.auth.access);
-  $("#setup").classList.toggle("connected",connected);
-  $("#spotifyBtn").textContent=connected?"Spotify connected":"Connect Spotify";
-  $("#setupState").textContent=connected?"connected":"not connected";
-}
-
 /* ---------------- wire up ---------------- */
 $("#addBtn").addEventListener("click",addAlbum);
 $("#link").addEventListener("keydown",e=>{ if(e.key==="Enter") addAlbum(); });
@@ -724,12 +626,6 @@ $("#qrtarget").addEventListener("change",e=>{ qrTarget=e.target.value; renderBin
 $("#exportBtn").addEventListener("click",exportData);
 $("#importBtn").addEventListener("click",()=>$("#importFile").click());
 $("#importFile").addEventListener("change",e=>{ if(e.target.files[0]) importData(e.target.files[0]); e.target.value=""; });
-$("#spotifyBtn").addEventListener("click",login);
-$("#importBtnSpotify").addEventListener("click",importSaved);
-$("#disconnectBtn").addEventListener("click",()=>{ state.auth=null; save(); updateAuthUI(); flash("Disconnected.",true); });
-$("#saveCid").addEventListener("click",()=>{ state.clientId=$("#clientId").value.trim(); save(); flash("Client ID saved.",true); });
-$("#copyUri").addEventListener("click",()=>{ navigator.clipboard?.writeText(redirectUri()); flash("Redirect URI copied.",true); });
-
 // top3 panel delegation
 $("#top3").addEventListener("click",e=>{
   const b=e.target.closest("button"); if(!b)return;
@@ -749,12 +645,12 @@ addEventListener("beforeunload",()=>{ try{ if(useLS) localStorage.setItem(KEY,JS
 
 /* ---------------- init ---------------- */
 (async function(){
-  const saved=await load(); if(saved) state=Object.assign({albums:[],top3:[],clientId:"",auth:null},saved);
-  $("#redirectUri").textContent=redirectUri();
-  $("#clientId").value=state.clientId||"";
+  const saved=await load();
+  if(saved) state={
+    albums:Array.isArray(saved.albums)?saved.albums:[],
+    top3:Array.isArray(saved.top3)?saved.top3:[]
+  };
   document.documentElement.style.setProperty("--puck",$("#size").value);
-  updateAuthUI();
-  await handleRedirect();   // completes login if we just came back from Spotify
   renderAll();
 })();
 </script>
