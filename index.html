@@ -329,7 +329,7 @@
         <input type="file" id="importFile" accept="application/json" hidden>
       </div>
     </div>
-    <div class="stencil"><b>THE CRATE</b> <em>flip the pages — tap a cover to open</em></div>
+    <div class="stencil"><b>THE CASES</b> <em>flip the pages — tap a cover to open</em></div>
     <div class="spread"><div class="grid" id="grid"></div></div>
   </div>
 
@@ -489,7 +489,7 @@ function renderBinder(){
     let e=document.querySelector(".empty");
     if(!e){ e=document.createElement("div"); e.className="empty";
       e.innerHTML=`<div class="disc-big"></div><h2 class="display">No cases yet</h2>
-        <p>Paste an album link from any service to start building your crate.</p>
+        <p>Paste an album link from any service to start building CD cases.</p>
         <div class="hint">Spotify · Apple Music · YouTube Music · Tidal · Deezer · Amazon</div>`;
       $(".spread").appendChild(e); }
     e.style.display="block"; return;

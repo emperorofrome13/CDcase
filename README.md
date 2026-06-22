@@ -1,6 +1,6 @@
 # CD Case
 
-CD Case is a standalone browser app for building a personal album crate out of share links. Paste an album link, generate a visual CD-style case, flip it open for playback links and QR codes, pin favorites into a Top 3 shelf, and print clean QR pucks for real-world sharing.
+CD Case is a standalone browser app for building a personal collection of CD-style album cases out of share links. Paste an album link, generate a visual CD-style case, flip it open for playback links and QR codes, pin favorites into a Top 3 shelf, and print clean QR pucks for real-world sharing.
 
 ## What it does
 
