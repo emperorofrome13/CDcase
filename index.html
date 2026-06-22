@@ -1,0 +1,761 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CD Case</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Bungee&family=Permanent+Marker&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+<style>
+  :root{
+    --wall:#0c0f15; --wall-2:#080a0f; --concrete:#151a23; --panel:#131722;
+    --ink:#06080c; --paper:#e7edf5; --text:#eaf0f7; --dim:#94a3b8;
+    --pink:#ff3d9a; --cyan:#19d3c6; --yellow:#36e0ff; --orange:#a86bff;
+    --green:#34efb0; --blue:#4d74ff; --red:#ff4d6d; --purple:#b14bff;
+    --line:#28303d; --puck:60mm;
+    --halo: conic-gradient(from 210deg,#ff3d9a,#36e0ff,#34efb0,#19d3c6,#b14bff,#4d74ff,#ff3d9a);
+    --street:"Bungee","Anton",system-ui,sans-serif;
+    --poster:"Anton","Bungee",sans-serif;
+    --tag:"Permanent Marker",cursive;
+    --mono:"Space Mono",ui-monospace,monospace;
+  }
+  *{box-sizing:border-box} html,body{margin:0}
+  body{
+    color:var(--text); background-color:var(--wall);
+    font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
+    -webkit-font-smoothing:antialiased; min-height:100vh; overflow-x:hidden;
+    background-image:
+      radial-gradient(60% 42% at 14% 10%, rgba(255,61,154,.16), transparent 62%),
+      radial-gradient(55% 42% at 86% 7%, rgba(25,211,198,.16), transparent 62%),
+      radial-gradient(52% 46% at 82% 93%, rgba(52,239,176,.12), transparent 62%),
+      radial-gradient(56% 46% at 16% 92%, rgba(54,224,255,.13), transparent 62%),
+      radial-gradient(46% 34% at 50% 50%, rgba(177,75,255,.10), transparent 70%);
+    background-attachment:fixed;
+  }
+  .mono{font-family:var(--mono)} .display{font-family:var(--street)}
+  button{font-family:inherit;cursor:pointer} a{color:inherit}
+
+  /* ---------- the wall: grain + scattered stickers ---------- */
+  #wall{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}
+  #wall::before{content:"";position:absolute;inset:0;opacity:.07;mix-blend-mode:soft-light;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+  .sticker{position:absolute;font-family:var(--tag);font-size:20px;color:var(--ink);
+    padding:7px 12px;border:2.5px solid var(--ink);border-radius:4px;box-shadow:4px 4px 0 rgba(0,0,0,.45);
+    white-space:nowrap;opacity:.92}
+  .sticker.s1{top:120px;left:18px;background:var(--pink);transform:rotate(-9deg)}
+  .sticker.s2{top:240px;right:22px;background:var(--cyan);transform:rotate(7deg);color:#062}
+  .sticker.s3{top:48%;left:10px;background:var(--yellow);transform:rotate(-4deg)}
+  .sticker.s4{top:60%;right:14px;background:var(--green);transform:rotate(6deg);color:#063}
+  .sticker.s5{bottom:90px;left:30px;background:var(--orange);transform:rotate(8deg)}
+  .sticker.s6{bottom:140px;right:28px;background:var(--purple);transform:rotate(-7deg);color:#fff}
+  .sticker.s7{top:360px;left:40px;background:#111;color:var(--green);transform:rotate(3deg);font-family:var(--street);font-size:15px}
+  .splat{position:absolute;border-radius:48% 52% 55% 45%/52% 46% 54% 48%;filter:blur(2px);opacity:.5}
+  .splat.p1{width:160px;height:140px;top:-30px;left:-40px;background:var(--pink)}
+  .splat.p2{width:180px;height:150px;bottom:-50px;right:-40px;background:var(--cyan)}
+  @media (max-width:1180px){ .sticker{display:none} }
+
+  /* ---------- header: sprayed marquee ---------- */
+  header{position:relative;z-index:2;background:linear-gradient(180deg,#0d1119,#080b10);
+    border-bottom:4px solid var(--ink);box-shadow:0 8px 0 -2px var(--yellow), 0 14px 36px -22px #000}
+  .bar{max-width:1100px;margin:0 auto;padding:18px 20px 16px;display:flex;flex-wrap:wrap;gap:14px;align-items:center}
+  .brand{display:flex;flex-direction:column;margin-right:auto;line-height:1}
+  .logo{font-family:var(--street);font-size:38px;letter-spacing:1px;color:var(--yellow);
+    transform:rotate(-3deg);text-shadow:3px 3px 0 var(--ink),6px 6px 0 rgba(255,46,136,.7),9px 9px 0 rgba(0,0,0,.35)}
+  .tagline{font-family:var(--tag);font-size:15px;color:var(--cyan);margin-top:10px;transform:rotate(-1.5deg)}
+  @media (max-width:560px){ .logo{font-size:30px} }
+
+  .add{display:flex;gap:8px;flex:1 1 300px;min-width:220px}
+  .add input{flex:1;min-width:0;background:var(--paper);color:#15110d;border:3px solid var(--ink);
+    border-radius:3px;padding:11px 13px;font-size:14px;font-family:var(--mono);
+    box-shadow:4px 4px 0 rgba(0,0,0,.5);transform:rotate(-.6deg)}
+  .add input::placeholder{color:#7e8a99}
+  .add input:focus{outline:none;border-color:var(--pink);box-shadow:4px 4px 0 var(--pink)}
+
+  .btn{font-family:var(--street);text-transform:uppercase;letter-spacing:.4px;font-size:13px;
+    background:var(--yellow);color:var(--ink);border:3px solid var(--ink);border-radius:4px;
+    padding:10px 15px;box-shadow:4px 4px 0 var(--ink);transform:rotate(-1deg);white-space:nowrap;
+    transition:transform .1s,box-shadow .1s,filter .1s}
+  .btn:hover{transform:rotate(0) translate(-1px,-1px);box-shadow:6px 6px 0 var(--ink);filter:saturate(1.1)}
+  .btn:active{transform:translate(2px,2px);box-shadow:1px 1px 0 var(--ink)}
+  .btn:disabled{opacity:.55;cursor:default;box-shadow:4px 4px 0 var(--ink)}
+  .btn.ghost{background:rgba(31,214,214,.08);color:var(--cyan);border-color:var(--cyan);box-shadow:4px 4px 0 rgba(0,0,0,.55)}
+  .btn.ghost:hover{box-shadow:6px 6px 0 rgba(0,0,0,.55)}
+  .btn.sm{padding:7px 11px;font-size:11px;box-shadow:3px 3px 0 var(--ink)}
+  .btn.ghost.sm{box-shadow:3px 3px 0 rgba(0,0,0,.55)}
+
+  .note{max-width:1100px;margin:0 auto;padding:0 20px;position:relative;z-index:2}
+  .note .msg{margin-top:10px;font-size:14px;font-family:var(--tag)}
+  .note .msg.bad{color:var(--red)} .note .msg.ok{color:var(--green)}
+
+  /* ---------- setup ---------- */
+  .setup{max-width:1100px;margin:0 auto;padding:0 20px;position:relative;z-index:2}
+  .setup details{margin-top:14px;border:3px solid var(--ink);border-radius:6px;background:var(--panel);
+    overflow:hidden;box-shadow:5px 5px 0 rgba(0,0,0,.5)}
+  .setup summary{cursor:pointer;list-style:none;padding:12px 16px;font-family:var(--street);font-size:13px;
+    text-transform:uppercase;letter-spacing:.5px;display:flex;align-items:center;gap:9px;background:#10141c}
+  .setup summary::-webkit-details-marker{display:none}
+  .setup summary .dot{width:11px;height:11px;border-radius:50%;background:var(--red);border:2px solid var(--ink)}
+  .setup.connected summary .dot{background:var(--green)}
+  .setup .body{padding:6px 16px 16px;font-size:13px;line-height:1.7;color:var(--dim)}
+  .setup .body ol{margin:6px 0 12px;padding-left:18px} .setup .body li{margin:5px 0}
+  .setup code,.uri{font-family:var(--mono);background:#0a0d12;border:1px solid var(--line);border-radius:5px;
+    padding:2px 6px;color:var(--yellow);font-size:12px}
+  .setup .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:10px 0}
+  .setup input.cid{flex:1;min-width:200px;background:var(--paper);color:#15110d;border:3px solid var(--ink);
+    border-radius:3px;padding:9px 11px;font-family:var(--mono);font-size:12px}
+  .uriwrap{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+
+  /* ---------- workspace ---------- */
+  .workspace{max-width:1100px;margin:0 auto;padding:24px 20px 60px;display:grid;gap:24px;
+    grid-template-columns:minmax(0,1fr) 300px;position:relative;z-index:2}
+  @media (max-width:880px){ .workspace{grid-template-columns:1fr} }
+
+  .stencil{font-family:var(--street);text-transform:uppercase;font-size:15px;letter-spacing:1px;
+    color:var(--text);margin-bottom:12px;display:flex;align-items:baseline;gap:10px;transform:rotate(-1deg)}
+  .stencil b{color:var(--yellow);text-shadow:2px 2px 0 var(--ink)}
+  .stencil em{font-family:var(--tag);font-style:normal;font-size:13px;color:var(--cyan);letter-spacing:0}
+
+  .controls{display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap}
+  .controls .seg{display:flex;align-items:center;gap:8px;margin-left:auto;flex-wrap:wrap}
+  .lbl{font-family:var(--tag);font-size:13px;color:var(--dim)}
+  select{background:var(--paper);color:#15110d;border:3px solid var(--ink);border-radius:3px;
+    padding:8px 10px;font-size:12px;font-family:var(--mono);box-shadow:3px 3px 0 rgba(0,0,0,.5)}
+  .pager{display:flex;align-items:center;gap:6px}
+  .pager .pg{background:var(--cyan);border:3px solid var(--ink);color:var(--ink);width:40px;height:40px;
+    border-radius:4px;font-family:var(--street);font-size:18px;line-height:1;box-shadow:3px 3px 0 var(--ink)}
+  .pager .pg:hover{transform:translate(-1px,-1px);box-shadow:5px 5px 0 var(--ink)}
+  .pager .pg:active{transform:translate(2px,2px);box-shadow:1px 1px 0 var(--ink)}
+  .pager .pg:disabled{opacity:.35;cursor:default;box-shadow:3px 3px 0 var(--ink);transform:none}
+  .pager .label{font-family:var(--mono);font-size:13px;color:var(--dim);min-width:96px;text-align:center}
+
+  .spread{background:linear-gradient(180deg,#161b24,#0c1018);border:4px solid var(--ink);border-radius:8px;
+    padding:22px 20px;position:relative;box-shadow:9px 9px 0 rgba(0,0,0,.5), inset 0 0 0 2px rgba(54,224,255,.18)}
+  .spread::before{content:"";position:absolute;left:50%;top:16px;bottom:16px;width:3px;transform:translateX(-50%) rotate(.4deg);
+    background:repeating-linear-gradient(rgba(255,46,136,.5) 0 9px, transparent 9px 24px);opacity:.5}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:22px}
+  @media (max-width:560px){ .grid{gap:16px} }
+
+  /* ---------- pinned, taped cases ---------- */
+  .sleeve{aspect-ratio:1/1;perspective:1300px;position:relative;transition:transform .18s ease}
+  .sleeve:hover{transform:scale(1.03);z-index:6}
+  .inner{position:relative;width:100%;height:100%;transition:transform .6s cubic-bezier(.2,.7,.2,1);
+    transform-style:preserve-3d;border-radius:4px}
+  .sleeve.flipped .inner{transform:rotateY(180deg)}
+  .face{position:absolute;inset:0;border-radius:6px;overflow:hidden;
+    -webkit-backface-visibility:hidden;backface-visibility:hidden;border:1.5px solid var(--ink);box-shadow:0 16px 32px -16px #000, 0 0 0 1px rgba(255,255,255,.06)}
+  .front{cursor:pointer;background:#0a0d12}
+  .front img{width:100%;height:100%;object-fit:cover;display:block}
+  .front .sheen{position:absolute;inset:0;pointer-events:none;mix-blend-mode:screen;opacity:.2;
+    background:linear-gradient(125deg,#fff6 0%,#fff0 24%,#fff0 62%,#0007 100%)}
+  .front .spine{position:absolute;left:0;right:0;bottom:0;padding:8px 10px;display:flex;align-items:flex-end;
+    justify-content:space-between;gap:8px;background:linear-gradient(transparent,#000d 78%)}
+  .front .spine .t{font-family:var(--street);font-size:13px;line-height:1.05;max-height:2.3em;overflow:hidden;
+    text-shadow:2px 2px 0 #000}
+  .front .cat{font-family:var(--mono);font-size:10px;color:var(--yellow);white-space:nowrap;background:#000a;padding:2px 5px;border-radius:3px}
+  .front .pin{position:absolute;top:8px;left:8px;width:30px;height:30px;border-radius:50%;border:2.5px solid var(--ink);
+    background:var(--paper);color:#15110d;font-size:15px;display:grid;place-items:center;line-height:1;box-shadow:2px 2px 0 rgba(0,0,0,.5);z-index:8}
+  .front .pin.on{background:var(--pink);color:#fff}
+  .front .flip-hint{position:absolute;top:8px;right:8px;width:28px;height:28px;border-radius:4px;background:var(--cyan);
+    color:var(--ink);display:grid;place-items:center;font-size:14px;border:2.5px solid var(--ink);opacity:0;transition:opacity .2s;z-index:8}
+  .front:hover .flip-hint{opacity:1}
+
+  .back{transform:rotateY(180deg);background:linear-gradient(180deg,#161b24,#0c1018);padding:11px;display:flex;flex-direction:column;gap:8px}
+  .back .top{display:flex;gap:10px;align-items:center}
+  .back .disc{width:40px;height:40px;border-radius:50%;flex:none;background:var(--halo);
+    -webkit-mask:radial-gradient(circle at center, transparent 6px, #000 7px, #000 99%, transparent 100%);
+    mask:radial-gradient(circle at center, transparent 6px, #000 7px, #000 99%, transparent 100%);box-shadow:0 0 0 2px var(--ink)}
+  .sleeve.flipped .back .disc{animation:spin 6s linear infinite}
+  .back .meta{min-width:0}
+  .back .meta .ti{font-family:var(--street);font-size:13px;line-height:1.05;outline:none}
+  .back .meta .ar{font-family:var(--tag);font-size:13px;color:var(--cyan);line-height:1.1;margin-top:3px;outline:none}
+  .back .meta [contenteditable]:focus{box-shadow:0 0 0 2px var(--pink);border-radius:3px}
+  .back .qrbox{display:flex;gap:10px;align-items:center}
+  .back .qr{background:#fff;border-radius:4px;padding:5px;line-height:0;border:2.5px solid var(--ink);box-shadow:2px 2px 0 rgba(0,0,0,.5)}
+  .back .qr .qr-host{width:68px;height:68px}
+  .back .qr .qr-host img,.back .qr .qr-host canvas{width:68px!important;height:68px!important;display:block}
+  .back .qr .cap{font-size:6.5px;text-align:center;color:#111;margin-top:2px;font-family:var(--mono);letter-spacing:.04em}
+  .back .svcs{display:flex;flex-wrap:wrap;gap:4px;align-content:flex-start;flex:1}
+  .chip{font-family:var(--street);font-size:9px;text-transform:uppercase;text-decoration:none;border:2px solid var(--ink);
+    color:#15110d;background:var(--paper);border-radius:3px;padding:4px 7px;line-height:1;white-space:nowrap;box-shadow:1.5px 1.5px 0 rgba(0,0,0,.5)}
+  .chip:hover{background:var(--yellow)}
+  .back .acts{display:flex;gap:5px;flex-wrap:wrap;margin-top:auto}
+  .mini{font-family:var(--street);text-transform:uppercase;font-size:10px;border:2px solid var(--ink);background:var(--paper);
+    color:#15110d;border-radius:3px;padding:6px 8px;display:inline-flex;align-items:center;gap:4px;text-decoration:none;box-shadow:1.5px 1.5px 0 rgba(0,0,0,.5)}
+  .mini:hover{transform:translate(-1px,-1px);box-shadow:3px 3px 0 rgba(0,0,0,.5)}
+  .mini.del{background:#2a1410;color:var(--red);border-color:var(--red)}
+  .mini.play{background:var(--pink);color:#fff;border-color:var(--ink)}
+
+  .slot{aspect-ratio:1/1;border:3px dashed var(--line);border-radius:4px;display:grid;place-items:center;
+    color:#586273;font-family:var(--tag);font-size:14px;text-align:center;transform:rotate(-1deg)}
+  .slot span{opacity:.8;padding:0 14px}
+  .empty{text-align:center;padding:46px 20px;color:var(--dim)}
+  .empty .disc-big{width:88px;height:88px;border-radius:50%;margin:0 auto 18px;background:var(--halo);border:3px solid var(--ink);
+    -webkit-mask:radial-gradient(circle at center, transparent 11px, #000 12px);mask:radial-gradient(circle at center, transparent 11px, #000 12px);animation:spin 12s linear infinite}
+  .empty h2{font-family:var(--street);color:var(--yellow);margin:0 0 8px;font-size:26px;text-shadow:3px 3px 0 var(--ink)}
+  .empty p{margin:0;font-size:14px} .empty .hint{margin-top:10px;font-family:var(--mono);font-size:12px;color:#6b7687}
+
+  /* ---------- top 3 ---------- */
+  .side{position:relative}
+  .side h2{font-family:var(--street);font-size:24px;margin:0 0 2px;color:var(--text);transform:rotate(-2deg);
+    text-shadow:3px 3px 0 var(--pink)}
+  .side .sub{font-family:var(--tag);font-size:15px;color:var(--yellow);margin-bottom:16px;transform:rotate(-1deg)}
+  .t3{display:flex;flex-direction:column;gap:14px}
+  .t3 .row{display:flex;gap:11px;align-items:center;background:var(--panel);border:3px solid var(--ink);border-radius:5px;
+    padding:10px;position:relative;min-height:74px;box-shadow:5px 5px 0 rgba(0,0,0,.45)}
+  .t3 .row:nth-child(1){transform:rotate(-1.4deg)} .t3 .row:nth-child(2){transform:rotate(1deg)} .t3 .row:nth-child(3){transform:rotate(-.7deg)}
+  .t3 .rank{position:absolute;top:-16px;left:-12px;font-family:var(--poster);font-size:40px;line-height:.8;
+    color:var(--yellow);text-shadow:3px 3px 0 var(--ink);transform:rotate(-8deg)}
+  .t3 .row:nth-child(2) .rank{color:var(--cyan)} .t3 .row:nth-child(3) .rank{color:var(--green)}
+  .t3 .cv{width:54px;height:54px;border-radius:3px;object-fit:cover;flex:none;background:#0a0d12;border:2.5px solid var(--ink)}
+  .t3 .info{min-width:0;flex:1}
+  .t3 .info .tt{font-family:var(--street);font-size:12px;line-height:1.05;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .t3 .info .aa{font-family:var(--tag);font-size:12px;color:var(--cyan);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-top:2px}
+  .t3 .ctrls{display:flex;gap:4px;margin-top:6px;flex-wrap:wrap}
+  .ic{width:27px;height:27px;border-radius:4px;border:2px solid var(--ink);background:var(--paper);color:#15110d;
+    font-size:12px;display:grid;place-items:center;line-height:1;box-shadow:1.5px 1.5px 0 rgba(0,0,0,.5)}
+  .ic:hover{transform:translate(-1px,-1px)} .ic:disabled{opacity:.3;transform:none}
+  .ic.play{background:var(--pink);color:#fff}
+  .t3 .open{border:3px dashed var(--line);border-radius:5px;min-height:74px;display:grid;place-items:center;color:#586273;
+    font-family:var(--tag);font-size:13px;text-align:center;padding:10px;transform:rotate(-1deg)}
+
+  footer{max-width:1100px;margin:0 auto;padding:6px 20px 40px;color:#6b7687;font-size:12px;font-family:var(--mono);
+    display:flex;justify-content:center;gap:14px;align-items:center;position:relative;z-index:2}
+  #saved{opacity:0;color:var(--green);font-family:var(--tag);font-size:14px;transition:opacity .25s} #saved.show{opacity:1}
+  .ar:empty:before{content:attr(data-ph);color:#6b7687}
+
+  /* ---------- player: spotlight on the wall ---------- */
+  #player{position:fixed;inset:0;z-index:100;display:none;place-items:center;
+    background:radial-gradient(60% 60% at 50% 42%, rgba(54,224,255,.12), rgba(4,6,10,.92) 70%);backdrop-filter:blur(7px)}
+  #player.on{display:grid;animation:fade .3s ease}
+  @keyframes fade{from{opacity:0}to{opacity:1}}
+  .case3d{perspective:1500px;width:min(78vw,330px);aspect-ratio:1;position:relative}
+  .stage{position:relative;width:100%;height:100%;transform-style:preserve-3d;transform:rotateX(4deg) rotateY(8deg)}
+  .tray{position:absolute;inset:0;border-radius:8px;background:linear-gradient(135deg,#1a2230,#0c1018);
+    box-shadow:0 30px 60px -20px #000, inset 0 0 0 3px var(--ink);display:grid;place-items:center}
+  .disc-play{width:80%;aspect-ratio:1;border-radius:50%;background-size:cover;background-position:center;
+    box-shadow:0 0 0 3px var(--ink),0 10px 30px -8px #000;position:relative;
+    -webkit-mask:radial-gradient(circle at center, transparent 11%, #000 12%);mask:radial-gradient(circle at center, transparent 11%, #000 12%)}
+  .disc-play::after{content:"";position:absolute;inset:0;border-radius:50%;
+    background:linear-gradient(135deg,#ffffff55,transparent 40%,transparent 60%,#ffffff33);mix-blend-mode:overlay}
+  .disc-play.spin{animation:spin 2.6s linear infinite}
+  .lid{position:absolute;inset:0;border-radius:8px;transform-origin:left center;backface-visibility:hidden;
+    transform:rotateY(0deg);transition:transform 1s cubic-bezier(.62,.05,.2,1);box-shadow:0 30px 60px -20px #000;border:3px solid var(--ink)}
+  .case3d.open .lid{transform:rotateY(-122deg)}
+  .lid img{width:100%;height:100%;object-fit:cover;border-radius:6px;display:block}
+  .lid .glass{position:absolute;inset:0;border-radius:6px;background:linear-gradient(120deg,#fff6 0,#fff0 30%,#fff0 65%,#0007 100%);mix-blend-mode:screen;pointer-events:none}
+  .lid .hinge{position:absolute;left:0;top:0;bottom:0;width:7px;background:linear-gradient(var(--pink),var(--ink));border-radius:6px 0 0 6px}
+  .nowplaying{position:absolute;left:0;right:0;bottom:-84px;text-align:center;opacity:0;transition:opacity .4s .6s}
+  .case3d.open .nowplaying{opacity:1}
+  .nowplaying .k{font-family:var(--tag);font-size:14px;color:var(--yellow)}
+  .nowplaying .tt{font-family:var(--street);font-size:22px;margin-top:6px;text-shadow:2px 2px 0 var(--ink)}
+  .nowplaying .aa{font-family:var(--tag);color:var(--cyan);font-size:15px;margin-top:4px}
+  .pbtns{position:absolute;left:0;right:0;bottom:-158px;display:flex;gap:8px;justify-content:center;opacity:0;transition:opacity .4s .9s}
+  .case3d.open .pbtns{opacity:1}
+  #closePlayer{position:absolute;top:20px;right:20px;width:42px;height:42px;border-radius:4px;background:var(--red);
+    color:#fff;border:3px solid var(--ink);font-family:var(--street);font-size:16px;box-shadow:3px 3px 0 var(--ink)}
+
+  /* ---------- print (kept clean) ---------- */
+  #printSheet{display:none}
+  .puck-grid{display:flex;flex-wrap:wrap;gap:10mm}
+  .puck-pair{display:flex;gap:6mm;align-items:flex-start;break-inside:avoid}
+  .puck{width:var(--puck);height:var(--puck);border-radius:50%;border:.4mm dashed #888;overflow:hidden;position:relative;display:flex;align-items:center;justify-content:center;background:#fff}
+  .puck.front img{width:100%;height:100%;object-fit:cover}
+  .puck.back{padding:4mm}
+  .puck.back .qr-host{width:100%;height:100%;display:flex;align-items:center;justify-content:center}
+  .puck.back .qr-host img,.puck.back .qr-host canvas{width:100%!important;height:100%!important;image-rendering:pixelated}
+  .puck .ring{position:absolute;inset:1.2mm;border-radius:50%;border:.6mm solid #00000018;pointer-events:none}
+  .puck-cap{font-family:var(--mono);font-size:8pt;color:#444;margin-top:1.5mm;text-align:center;width:var(--puck)}
+  .print-head{display:none}
+  @media print{ @page{margin:12mm}
+    body{background:#fff!important}
+    header,.setup,.workspace,footer,#player,#wall{display:none!important}
+    #printSheet{display:block!important;color:#000}
+    .print-head{display:block;margin-bottom:8mm;font-family:var(--mono)}
+    .print-head h2{font-size:14pt;margin:0 0 3mm} .print-head p{font-size:9pt;margin:0;max-width:150mm;line-height:1.5}}
+
+  @media (prefers-reduced-motion: reduce){
+    .inner,.lid,.nowplaying,.pbtns,.sleeve{transition:none!important}
+    .disc,.disc-big,.disc-play.spin{animation:none!important}
+  }
+</style>
+
+
+<div id="wall" aria-hidden="true">
+  <div class="splat p1"></div><div class="splat p2"></div>
+  <div class="sticker s1">BOOM BAP</div>
+  <div class="sticker s2">ACID HOUSE :)</div>
+  <div class="sticker s3">PUNK'S NOT DEAD</div>
+  <div class="sticker s4">DUB</div>
+  <div class="sticker s5">DISCO</div>
+  <div class="sticker s6">SOUL</div>
+  <div class="sticker s7">// JAZZ NIGHT</div>
+</div>
+<header>
+  <div class="bar">
+    <div class="brand">
+      <div class="logo">CD CASE</div>
+      <div class="tagline">save · pin · play · print</div>
+    </div>
+    <div class="add">
+      <input id="link" placeholder="paste an album link from any service…" autocomplete="off" spellcheck="false">
+      <button class="btn" id="addBtn">Add</button>
+    </div>
+    <button class="btn ghost" id="spotifyBtn">Connect Spotify</button>
+  </div>
+  <div class="note"><div class="msg" id="msg" hidden></div></div>
+</header>
+
+<div class="setup" id="setup">
+  <details id="setupDetails">
+    <summary><span class="dot"></span> Spotify setup &amp; import <span class="lbl" id="setupState" style="margin-left:auto"></span></summary>
+    <div class="body">
+      <p>To log in and pull your saved albums, this file must be served from a loopback address (Spotify no longer allows <code>localhost</code> or plain web <code>http</code>). One-time setup:</p>
+      <ol>
+        <li>Save this file as <code>index.html</code> in a folder, then in that folder run:
+            <code>python3 -m http.server 8888 --bind 127.0.0.1</code></li>
+        <li>Open <code>http://127.0.0.1:8888/</code> in your browser.</li>
+        <li>At <code>developer.spotify.com/dashboard</code> create an app (Web API), and add this exact Redirect URI:
+            <div class="uriwrap" style="margin-top:6px"><span class="uri" id="redirectUri">—</span>
+              <button class="btn ghost sm" id="copyUri">Copy</button></div></li>
+        <li>Copy the app's <b>Client ID</b> and paste it here:
+            <div class="row"><input class="cid" id="clientId" placeholder="Spotify Client ID" spellcheck="false">
+              <button class="btn sm" id="saveCid">Save ID</button></div></li>
+        <li>Click <b>Connect Spotify</b> up top, approve, then use <b>Import saved albums</b>.</li>
+      </ol>
+      <div class="row">
+        <button class="btn sm" id="importBtnSpotify">Import saved albums</button>
+        <button class="btn ghost sm" id="disconnectBtn">Disconnect</button>
+      </div>
+      <p style="font-size:12px;margin-top:6px">No login needed for the rest of the app — pasting links, pinning, playing and printing all work on their own.</p>
+    </div>
+  </details>
+</div>
+
+
+<div class="workspace">
+  <div class="left">
+    <div class="controls">
+      <div class="pager">
+        <button class="pg" id="prev" aria-label="Previous page">‹</button>
+        <span class="label mono" id="pglabel">Page 1 / 1</span>
+        <button class="pg" id="next" aria-label="Next page">›</button>
+      </div>
+      <div class="seg">
+        <span class="lbl">QR</span>
+        <select id="qrtarget" title="What each puck's QR points to">
+          <option value="spotify" selected>Spotify</option>
+          <option value="universal">Any service</option>
+        </select>
+        <span class="lbl">Puck</span>
+        <select id="size"><option value="45mm">45mm</option><option value="60mm" selected>60mm</option><option value="120mm">120mm</option></select>
+        <button class="btn ghost sm" id="printAll">Print</button>
+        <button class="btn ghost sm" id="exportBtn">Export</button>
+        <button class="btn ghost sm" id="importBtn">Import</button>
+        <input type="file" id="importFile" accept="application/json" hidden>
+      </div>
+    </div>
+    <div class="stencil"><b>THE CRATE</b> <em>flip the pages — tap a cover to open</em></div>
+    <div class="spread"><div class="grid" id="grid"></div></div>
+  </div>
+
+  <aside class="side">
+    <h2 class="display">TOP 3</h2>
+    <div class="sub">on heavy rotation</div>
+    <div class="t3" id="top3"></div>
+  </aside>
+</div>
+
+<footer><span id="count"></span><span id="saved">Saved ✓</span></footer>
+
+
+<div id="player">
+  <button id="closePlayer" aria-label="Close">✕</button>
+  <div class="case3d" id="case3d">
+    <div class="stage">
+      <div class="tray"><div class="disc-play" id="discPlay"></div></div>
+      <div class="lid"><img id="lidImg" alt=""><div class="glass"></div><div class="hinge"></div></div>
+    </div>
+    <div class="nowplaying"><div class="k">Now playing</div><div class="tt" id="npTitle"></div><div class="aa" id="npArtist"></div></div>
+    <div class="pbtns">
+      <a class="btn" id="npOpen" target="_blank" rel="noopener">Open in Spotify</a>
+      <button class="btn ghost" id="npClose">Close</button>
+    </div>
+  </div>
+</div>
+<div id="printSheet"></div>
+
+
+<script>
+"use strict";
+/* ---------------- persistence (localStorage when self-hosted, window.storage fallback) ---------------- */
+const KEY="cdcase:v1";
+let useLS=false; try{ localStorage.setItem("__t","1"); localStorage.removeItem("__t"); useLS=true; }catch(e){}
+const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+let state={ albums:[], top3:[], clientId:"", auth:null };
+
+function save(){
+  const data=JSON.stringify(state);
+  if(useLS){ try{ localStorage.setItem(KEY,data); }catch(e){} }
+  try{ window.storage.set(KEY,data); }catch(e){}
+  const s=$("#saved"); s.classList.add("show"); clearTimeout(save._t); save._t=setTimeout(()=>s.classList.remove("show"),1100);
+}
+async function load(){
+  if(useLS){ const d=localStorage.getItem(KEY); if(d){ try{ return JSON.parse(d); }catch(e){} } }
+  try{ const r=await window.storage.get(KEY); if(r) return JSON.parse(r.value); }catch(e){}
+  // migrate from the older Disc Binder build if present
+  try{ const old=await window.storage.get("discbinder:albums:v2");
+    if(old){ const arr=JSON.parse(old.value); if(Array.isArray(arr)) return {albums:arr,top3:[],clientId:"",auth:null}; } }catch(e){}
+  return null;
+}
+
+/* ---------------- state helpers ---------------- */
+let page=0, qrTarget="spotify";
+const PER=4;
+const $=s=>document.querySelector(s);
+const grid=$("#grid");
+const PLATFORMS=[["spotify","Spotify"],["appleMusic","Apple"],["youtubeMusic","YT Music"],["youtube","YouTube"],
+  ["tidal","Tidal"],["deezer","Deezer"],["amazonMusic","Amazon"],["soundcloud","SoundCloud"],["pandora","Pandora"]];
+
+function cat(i){ return "DSC-"+String(i+1).padStart(3,"0"); }
+function esc(s){ return (s||"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c])); }
+function flash(t,ok){ const m=$("#msg"); if(!t){m.hidden=true;m.textContent="";return;} m.hidden=false; m.className="msg "+(ok?"ok":"bad"); m.textContent=t; }
+function parseUrl(u){ try{ const x=new URL(u.trim()); return /^https?:$/.test(x.protocol)?x.toString():null; }catch(e){ return null; } }
+function spotifyUrlOf(a){ return (a.links&&a.links.spotify)||a.spotify||""; }
+function firstLink(a){ const v=Object.values(a.links||{}); return v[0]||a.url||""; }
+function qrUrlFor(a){ return qrTarget==="universal" ? (a.pageUrl||spotifyUrlOf(a)||firstLink(a)) : (spotifyUrlOf(a)||a.pageUrl||firstLink(a)); }
+function spotifyUri(a){ const m=spotifyUrlOf(a).match(/open\.spotify\.com\/(album|track|playlist)\/([A-Za-z0-9]+)/); return m?`spotify:${m[1]}:${m[2]}`:null; }
+function dedupeKey(a){ return a.pageUrl||spotifyUrlOf(a)||a.url||""; }
+function albumById(id){ return state.albums.find(a=>a.id===id); }
+function makeQR(host,text,px){ host.innerHTML=""; if(!text)return; new QRCode(host,{text,width:px,height:px,correctLevel:QRCode.CorrectLevel.H,colorDark:"#000",colorLight:"#fff"}); }
+
+/* ---------------- resolve across services ---------------- */
+async function resolve(url){
+  const r=await fetch("https://api.song.link/v1-alpha.1/links?userCountry=US&url="+encodeURIComponent(url));
+  if(!r.ok) throw new Error("odesli");
+  const d=await r.json(); const links={}; const lbp=d.linksByPlatform||{};
+  for(const k in lbp){ if(lbp[k]&&lbp[k].url) links[k]=lbp[k].url; }
+  const ents=d.entitiesByUniqueId||{}; const ent=ents[d.entityUniqueId]||Object.values(ents)[0]||{};
+  return { links, pageUrl:d.pageUrl||url, title:ent.title||"Untitled", artist:ent.artistName||"", cover:ent.thumbnailUrl||"" };
+}
+async function spotifyOnly(url){
+  const r=await fetch("https://open.spotify.com/oembed?url="+encodeURIComponent(url)); if(!r.ok) throw new Error("oembed");
+  const d=await r.json(); return { links:{spotify:url}, pageUrl:url, title:d.title||"Untitled", artist:"", cover:d.thumbnail_url||"" };
+}
+
+/* ---------------- add ---------------- */
+async function addAlbum(){
+  const raw=$("#link").value, url=parseUrl(raw);
+  if(!url){ flash("That's not a valid link. Use an album's Share → Copy link from any music app."); return; }
+  flash(""); const btn=$("#addBtn"); btn.disabled=true; btn.textContent="…";
+  let meta=null;
+  try{ meta=await resolve(url); }catch(e){ try{ if(/spotify\.com/.test(url)) meta=await spotifyOnly(url); }catch(_){} }
+  btn.disabled=false; btn.textContent="Add";
+  if(!meta){
+    const cover=prompt("Couldn't reach the link service. Paste a cover image URL, or leave blank:")||"";
+    const title=prompt("Album title:","")||"Untitled";
+    meta={links:{unknown:url},pageUrl:url,title,artist:"",cover};
+  }
+  const al={id:crypto.randomUUID(),...meta,url:meta.pageUrl,added:Date.now()};
+  if(state.albums.some(a=>dedupeKey(a)===dedupeKey(al))){ flash("That album is already in your cases.",true); $("#link").value=""; jumpTo(al); return; }
+  state.albums.push(al); save(); $("#link").value="";
+  const n=Object.keys(al.links).filter(k=>k!=="unknown").length;
+  flash(n?`Added "${al.title}" · found on ${n} service${n===1?"":"s"}.`:`Added "${al.title}".`,true);
+  jumpTo(al);
+}
+function jumpTo(al){ const i=state.albums.findIndex(a=>a.id===al.id); if(i>=0) page=Math.floor(i/PER); renderAll(); }
+function removeAlbum(id){ state.albums=state.albums.filter(a=>a.id!==id); state.top3=state.top3.filter(x=>x!==id); save(); renderAll(); }
+function saveEdit(id,f,v){ const a=albumById(id); if(!a)return; a[f]=v.trim()||(f==="title"?"Untitled":""); save(); }
+
+/* ---------------- top 3 ---------------- */
+function inTop3(id){ return state.top3.includes(id); }
+function toggleTop3(id){
+  if(inTop3(id)){ state.top3=state.top3.filter(x=>x!==id); }
+  else { if(state.top3.length>=3){ flash("Top 3 is full — remove one first."); return; } state.top3.push(id); }
+  save(); renderAll();
+}
+function moveTop3(id,dir){ const i=state.top3.indexOf(id); const j=i+dir;
+  if(i<0||j<0||j>=state.top3.length) return; [state.top3[i],state.top3[j]]=[state.top3[j],state.top3[i]]; save(); renderTop3(); }
+
+function renderTop3(){
+  const wrap=$("#top3"); wrap.innerHTML="";
+  state.top3=state.top3.filter(id=>albumById(id)); // drop stale
+  for(let r=0;r<3;r++){
+    const id=state.top3[r], a=id&&albumById(id);
+    if(a){
+      const row=document.createElement("div"); row.className="row";
+      row.innerHTML=`<div class="rank">${r+1}</div>
+        <img class="cv" src="${esc(a.cover)}" alt="">
+        <div class="info"><div class="tt">${esc(a.title)}</div><div class="aa">${esc(a.artist||"")}</div>
+          <div class="ctrls">
+            <button class="ic play" title="Play" data-play="${a.id}">▶</button>
+            <button class="ic" title="Move up" data-up="${a.id}" ${r===0?"disabled":""}>↑</button>
+            <button class="ic" title="Move down" data-down="${a.id}" ${r===state.top3.length-1?"disabled":""}>↓</button>
+            <button class="ic" title="Unpin" data-unpin="${a.id}">★</button>
+          </div></div>`;
+      wrap.appendChild(row);
+    } else {
+      const o=document.createElement("div"); o.className="open";
+      o.textContent="Pin an album with ★ from its back";
+      wrap.appendChild(o);
+    }
+  }
+}
+
+/* ---------------- binder ---------------- */
+function renderAll(){ renderBinder(); renderTop3(); $("#count").textContent=`${state.albums.length} case${state.albums.length===1?"":"s"}`; }
+function renderBinder(){
+  const pages=Math.max(1,Math.ceil(state.albums.length/PER));
+  page=Math.min(Math.max(0,page),pages-1);
+  $("#pglabel").textContent=`Page ${page+1} / ${pages}`;
+  $("#prev").disabled=page===0; $("#next").disabled=page>=pages-1;
+  if(state.albums.length===0){
+    grid.style.display="none";
+    let e=document.querySelector(".empty");
+    if(!e){ e=document.createElement("div"); e.className="empty";
+      e.innerHTML=`<div class="disc-big"></div><h2 class="display">No cases yet</h2>
+        <p>Paste an album link from any service, or connect Spotify to import your saved albums.</p>
+        <div class="hint">Spotify · Apple Music · YouTube Music · Tidal · Deezer · Amazon</div>`;
+      $(".spread").appendChild(e); }
+    e.style.display="block"; return;
+  }
+  const e=document.querySelector(".empty"); if(e) e.style.display="none";
+  grid.style.display="grid";
+  const start=page*PER; grid.innerHTML="";
+  for(let i=0;i<PER;i++){ const a=state.albums[start+i]; grid.appendChild(a?sleeve(a,start+i):slot()); }
+}
+function slot(){ const d=document.createElement("div"); d.className="slot"; d.innerHTML=`<span>EMPTY SLEEVE</span>`; return d; }
+
+function sleeve(a,idx){
+  const wrap=document.createElement("div"); wrap.className="sleeve";
+  const cover=a.cover?`<img src="${esc(a.cover)}" alt="${esc(a.title)} cover" loading="lazy">`
+    :`<div style="width:100%;height:100%;display:grid;place-items:center;color:#6b6377;font-family:'Space Mono';font-size:11px">NO COVER</div>`;
+  const chips=PLATFORMS.filter(([k])=>a.links&&a.links[k]).map(([k,n])=>`<a class="chip" href="${esc(a.links[k])}" target="_blank" rel="noopener">${n}</a>`).join("");
+  const uri=spotifyUri(a);
+  wrap.innerHTML=`
+    <div class="inner">
+      <div class="face front" data-flip>
+        ${cover}<div class="sheen"></div>
+        <button class="pin ${inTop3(a.id)?"on":""}" title="Top 3" data-pin="${a.id}">★</button>
+        <div class="flip-hint">⤿</div>
+        <div class="spine"><div class="t">${esc(a.title)}</div><div class="cat">${cat(idx)}</div></div>
+      </div>
+      <div class="face back">
+        <div class="top"><div class="disc"></div>
+          <div class="meta">
+            <div class="ti" contenteditable spellcheck="false" data-edit="title">${esc(a.title)}</div>
+            <div class="ar" contenteditable spellcheck="false" data-edit="artist" data-ph="add artist…">${esc(a.artist)}</div>
+          </div></div>
+        <div class="qrbox"><div class="qr"><div class="qr-host"></div><div class="cap">SCAN TO PLAY</div></div>
+          <div class="svcs">${chips||'<span class="lbl">no links</span>'}</div></div>
+        <div class="acts">
+          <button class="mini play" data-play="${a.id}">▶ Play</button>
+          ${uri?`<a class="mini" href="${uri}">app</a>`:""}
+          <button class="mini" data-pinback="${a.id}">${inTop3(a.id)?"★ pinned":"☆ Top 3"}</button>
+          <button class="mini" data-print="${a.id}">⎙</button>
+          <button class="mini" data-back>↩</button>
+          <button class="mini del" data-del="${a.id}">✕</button>
+        </div>
+      </div>
+    </div>`;
+  try{ makeQR(wrap.querySelector(".qr-host"),qrUrlFor(a),70); }catch(e){}
+  wrap.querySelector("[data-flip]").addEventListener("click",e=>{ if(e.target.closest("[data-pin]"))return; wrap.classList.add("flipped"); });
+  wrap.querySelector("[data-pin]").addEventListener("click",e=>{ e.stopPropagation(); toggleTop3(a.id); });
+  wrap.querySelector("[data-back]").addEventListener("click",e=>{ e.stopPropagation(); wrap.classList.remove("flipped"); });
+  wrap.querySelector("[data-pinback]").addEventListener("click",e=>{ e.stopPropagation(); toggleTop3(a.id); });
+  wrap.querySelector("[data-play]").addEventListener("click",e=>{ e.stopPropagation(); openPlayer(a); });
+  wrap.querySelector("[data-del]").addEventListener("click",e=>{ e.stopPropagation(); if(confirm(`Remove "${a.title}"?`)) removeAlbum(a.id); });
+  wrap.querySelector("[data-print]").addEventListener("click",e=>{ e.stopPropagation(); printPucks([a]); });
+  wrap.querySelectorAll("[data-edit]").forEach(el=>{
+    el.addEventListener("blur",()=>{ saveEdit(a.id,el.dataset.edit,el.textContent);
+      if(el.dataset.edit==="title") wrap.querySelector(".front .t").textContent=el.textContent.trim()||"Untitled"; });
+    el.addEventListener("keydown",ev=>{ if(ev.key==="Enter"){ ev.preventDefault(); el.blur(); } });
+  });
+  return wrap;
+}
+
+/* ---------------- play: cd case opening animation ---------------- */
+let playTimer=null;
+function openPlayer(a){
+  const c=$("#case3d");
+  $("#lidImg").src=a.cover||""; $("#discPlay").style.backgroundImage=a.cover?`url("${a.cover}")`:"none";
+  $("#npTitle").textContent=a.title||""; $("#npArtist").textContent=a.artist||"";
+  const uri=spotifyUri(a), web=spotifyUrlOf(a)||a.pageUrl||firstLink(a);
+  $("#npOpen").href=web||"#";
+  $("#discPlay").classList.remove("spin"); c.classList.remove("open");
+  $("#player").classList.add("on");
+  clearTimeout(playTimer);
+  const openIt=()=>{ c.classList.add("open"); $("#discPlay").classList.add("spin");
+    if(uri){ playTimer=setTimeout(()=>{ try{ window.location.href=uri; }catch(e){} }, reduce?200:1700); } };
+  if(reduce) openIt(); else requestAnimationFrame(()=>setTimeout(openIt,120));
+}
+function closePlayer(){ clearTimeout(playTimer); $("#player").classList.remove("on"); $("#case3d").classList.remove("open"); $("#discPlay").classList.remove("spin"); }
+$("#closePlayer").addEventListener("click",closePlayer);
+$("#npClose").addEventListener("click",closePlayer);
+$("#player").addEventListener("click",e=>{ if(e.target.id==="player") closePlayer(); });
+document.addEventListener("keydown",e=>{ if(e.key==="Escape") closePlayer(); });
+
+/* ---------------- print ---------------- */
+function printPucks(list){
+  if(!list.length){ flash("Add an album before printing."); return; }
+  const label=qrTarget==="universal"?"a song.link page (any service)":"Spotify";
+  const sheet=$("#printSheet");
+  sheet.innerHTML=`<div class="print-head"><h2>CD Case — QR Pucks</h2>
+    <p>Cut along each dashed circle. Glue every FRONT and BACK pair back-to-back to make a two-sided puck. Scanning the QR side opens the album in ${label}.</p></div>`;
+  const g=document.createElement("div"); g.className="puck-grid";
+  list.forEach(a=>{
+    const pair=document.createElement("div"); pair.className="puck-pair";
+    const f=document.createElement("div");
+    f.innerHTML=`<figure class="puck front">${a.cover?`<img src="${esc(a.cover)}">`:""}<div class="ring"></div></figure><div class="puck-cap">FRONT · ${esc(a.title)}</div>`;
+    const b=document.createElement("div");
+    b.innerHTML=`<figure class="puck back"><div class="qr-host"></div><div class="ring"></div></figure><div class="puck-cap">SCAN · ${cat(state.albums.indexOf(a))}</div>`;
+    pair.appendChild(f); pair.appendChild(b); g.appendChild(pair);
+    try{ makeQR(b.querySelector(".qr-host"),qrUrlFor(a),600); }catch(e){}
+  });
+  sheet.appendChild(g); setTimeout(()=>window.print(),300);
+}
+
+/* ---------------- export / import ---------------- */
+function exportData(){
+  const backup={
+    albums:state.albums,
+    top3:state.top3.filter(id=>albumById(id))
+  };
+  const blob=new Blob([JSON.stringify(backup,null,2)],{type:"application/json"});
+  const url=URL.createObjectURL(blob); const a=document.createElement("a");
+  a.href=url; a.download="cd-case-backup.json"; a.click(); setTimeout(()=>URL.revokeObjectURL(url),1000);
+  flash(`Exported ${state.albums.length} case${state.albums.length===1?"":"s"}.`,true);
+}
+async function importData(file){
+  try{
+    const inc=JSON.parse(await file.text());
+    const arr=Array.isArray(inc)?inc:(inc.albums||[]);
+    let added=0;
+    arr.forEach(it=>{ if(!it||(!it.pageUrl&&!it.url&&!(it.links&&it.links.spotify)))return;
+      const o={id:it.id||crypto.randomUUID(),title:it.title||"Untitled",artist:it.artist||"",cover:it.cover||"",
+        links:it.links||{},pageUrl:it.pageUrl||it.url||"",url:it.url||it.pageUrl||"",added:it.added||Date.now()};
+      if(!state.albums.some(a=>dedupeKey(a)===dedupeKey(o))){ state.albums.push(o); added++; } });
+    if(!Array.isArray(inc)&&Array.isArray(inc.top3)) inc.top3.forEach(id=>{ if(albumById(id)&&!inTop3(id)&&state.top3.length<3) state.top3.push(id); });
+    save(); renderAll(); flash(`Imported ${added} new case${added===1?"":"s"}.`,true);
+  }catch(e){ flash("Couldn't read that file — use a CD Case export (.json)."); }
+}
+
+/* ---------------- spotify oauth (pkce) ---------------- */
+function redirectUri(){ return location.origin+location.pathname; }
+function b64url(buf){ return btoa(String.fromCharCode(...new Uint8Array(buf))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,''); }
+function randStr(n){ const a=new Uint8Array(n); crypto.getRandomValues(a); return Array.from(a,b=>("0"+b.toString(16)).slice(-2)).join(""); }
+async function sha256(s){ return crypto.subtle.digest("SHA-256", new TextEncoder().encode(s)); }
+function canAuth(){ return location.protocol==="https:" || location.hostname==="127.0.0.1"; }
+
+async function login(){
+  if(!state.clientId){ flash("Add your Spotify Client ID in Setup first."); $("#setupDetails").open=true; return; }
+  if(!canAuth()){ flash("Login needs the page served from http://127.0.0.1 (see Setup)."); $("#setupDetails").open=true; return; }
+  const v=randStr(48), ch=b64url(await sha256(v));
+  try{ sessionStorage.setItem("cdcase_v",v); }catch(e){ flash("Your browser blocked session storage; run it from 127.0.0.1."); return; }
+  const p=new URLSearchParams({client_id:state.clientId,response_type:"code",redirect_uri:redirectUri(),
+    code_challenge_method:"S256",code_challenge:ch,scope:"user-library-read"});
+  location.href="https://accounts.spotify.com/authorize?"+p.toString();
+}
+async function handleRedirect(){
+  const u=new URL(location.href);
+  if(u.searchParams.get("error")){ flash("Spotify login was cancelled."); history.replaceState({},"",redirectUri()); return; }
+  const code=u.searchParams.get("code"); if(!code) return;
+  let v=null; try{ v=sessionStorage.getItem("cdcase_v"); }catch(e){}
+  history.replaceState({},"",redirectUri());
+  if(!v) return;
+  try{
+    const body=new URLSearchParams({grant_type:"authorization_code",code,redirect_uri:redirectUri(),client_id:state.clientId,code_verifier:v});
+    const r=await fetch("https://accounts.spotify.com/api/token",{method:"POST",headers:{"Content-Type":"application/x-www-form-urlencoded"},body});
+    const t=await r.json();
+    if(t.access_token){ state.auth={access:t.access_token,refresh:t.refresh_token||null,expires:Date.now()+t.expires_in*1000}; save(); updateAuthUI(); flash("Connected to Spotify. Use Import saved albums.",true); }
+    else flash("Spotify login failed: "+(t.error_description||t.error||"unknown"));
+  }catch(e){ flash("Spotify token exchange failed."); }
+}
+async function token(){
+  if(!state.auth) return null;
+  if(Date.now()<state.auth.expires-60000) return state.auth.access;
+  if(!state.auth.refresh) return null;
+  try{
+    const body=new URLSearchParams({grant_type:"refresh_token",refresh_token:state.auth.refresh,client_id:state.clientId});
+    const r=await fetch("https://accounts.spotify.com/api/token",{method:"POST",headers:{"Content-Type":"application/x-www-form-urlencoded"},body});
+    const t=await r.json();
+    if(t.access_token){ state.auth.access=t.access_token; state.auth.expires=Date.now()+t.expires_in*1000; if(t.refresh_token) state.auth.refresh=t.refresh_token; save(); return state.auth.access; }
+  }catch(e){}
+  return null;
+}
+async function importSaved(){
+  const tok=await token(); if(!tok){ flash("Connect Spotify first."); $("#setupDetails").open=true; return; }
+  flash("Importing your Spotify library…",true);
+  let url="https://api.spotify.com/v1/me/albums?limit=50", added=0, seen=0;
+  try{
+    while(url){
+      const r=await fetch(url,{headers:{Authorization:"Bearer "+tok}});
+      if(!r.ok){ flash("Spotify import failed ("+r.status+")."); break; }
+      const d=await r.json();
+      (d.items||[]).forEach(it=>{ const al=it.album; if(!al)return; seen++;
+        const link=(al.external_urls&&al.external_urls.spotify)||("https://open.spotify.com/album/"+al.id);
+        const cover=(al.images&&al.images[0]&&al.images[0].url)||"";
+        const artist=(al.artists||[]).map(x=>x.name).join(", ");
+        const o={id:crypto.randomUUID(),title:al.name||"Untitled",artist,cover,links:{spotify:link},pageUrl:link,url:link,added:Date.now()};
+        if(!state.albums.some(a=>dedupeKey(a)===dedupeKey(o))){ state.albums.push(o); added++; } });
+      url=d.next;
+    }
+    save(); renderAll(); flash(`Imported ${added} new album${added===1?"":"s"} (${seen} in your library).`,true);
+  }catch(e){ flash("Couldn't reach Spotify. Make sure you're on http://127.0.0.1."); }
+}
+function updateAuthUI(){
+  const connected=!!(state.auth&&state.auth.access);
+  $("#setup").classList.toggle("connected",connected);
+  $("#spotifyBtn").textContent=connected?"Spotify connected":"Connect Spotify";
+  $("#setupState").textContent=connected?"connected":"not connected";
+}
+
+/* ---------------- wire up ---------------- */
+$("#addBtn").addEventListener("click",addAlbum);
+$("#link").addEventListener("keydown",e=>{ if(e.key==="Enter") addAlbum(); });
+$("#prev").addEventListener("click",()=>{ page--; renderBinder(); });
+$("#next").addEventListener("click",()=>{ page++; renderBinder(); });
+$("#printAll").addEventListener("click",()=>printPucks(state.albums));
+$("#size").addEventListener("change",e=>document.documentElement.style.setProperty("--puck",e.target.value));
+$("#qrtarget").addEventListener("change",e=>{ qrTarget=e.target.value; renderBinder(); });
+$("#exportBtn").addEventListener("click",exportData);
+$("#importBtn").addEventListener("click",()=>$("#importFile").click());
+$("#importFile").addEventListener("change",e=>{ if(e.target.files[0]) importData(e.target.files[0]); e.target.value=""; });
+$("#spotifyBtn").addEventListener("click",login);
+$("#importBtnSpotify").addEventListener("click",importSaved);
+$("#disconnectBtn").addEventListener("click",()=>{ state.auth=null; save(); updateAuthUI(); flash("Disconnected.",true); });
+$("#saveCid").addEventListener("click",()=>{ state.clientId=$("#clientId").value.trim(); save(); flash("Client ID saved.",true); });
+$("#copyUri").addEventListener("click",()=>{ navigator.clipboard?.writeText(redirectUri()); flash("Redirect URI copied.",true); });
+
+// top3 panel delegation
+$("#top3").addEventListener("click",e=>{
+  const b=e.target.closest("button"); if(!b)return;
+  if(b.dataset.play){ const a=albumById(b.dataset.play); if(a) openPlayer(a); }
+  else if(b.dataset.up) moveTop3(b.dataset.up,-1);
+  else if(b.dataset.down) moveTop3(b.dataset.down,1);
+  else if(b.dataset.unpin) toggleTop3(b.dataset.unpin);
+});
+
+document.addEventListener("keydown",e=>{
+  if(e.target.matches("input,[contenteditable]")) return;
+  if($("#player").classList.contains("on")) return;
+  if(e.key==="ArrowLeft" && !$("#prev").disabled){ page--; renderBinder(); }
+  if(e.key==="ArrowRight" && !$("#next").disabled){ page++; renderBinder(); }
+});
+addEventListener("beforeunload",()=>{ try{ if(useLS) localStorage.setItem(KEY,JSON.stringify(state)); }catch(e){} });
+
+/* ---------------- init ---------------- */
+(async function(){
+  const saved=await load(); if(saved) state=Object.assign({albums:[],top3:[],clientId:"",auth:null},saved);
+  $("#redirectUri").textContent=redirectUri();
+  $("#clientId").value=state.clientId||"";
+  document.documentElement.style.setProperty("--puck",$("#size").value);
+  updateAuthUI();
+  await handleRedirect();   // completes login if we just came back from Spotify
+  renderAll();
+})();
+</script>
+</html>
