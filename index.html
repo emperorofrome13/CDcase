@@ -138,6 +138,53 @@
   .grid{display:grid;grid-template-columns:1fr 1fr;gap:22px}
   @media (max-width:560px){ .grid{gap:16px} }
 
+  /* ---------- story maker ---------- */
+  .case-row{display:grid;grid-template-columns:74px minmax(0,1fr);gap:14px;align-items:start}
+  .social-rail{display:flex;flex-direction:column;gap:9px;position:sticky;top:18px}
+  .social-cap{font-family:var(--tag);font-size:12px;color:var(--yellow);text-align:center;transform:rotate(-3deg)}
+  .social-btn{min-height:58px;border:3px solid var(--ink);border-radius:5px;background:var(--paper);color:var(--ink);
+    box-shadow:4px 4px 0 rgba(0,0,0,.55);font-family:var(--street);font-size:10px;letter-spacing:.3px;text-transform:uppercase;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;line-height:1;transform:rotate(-1deg)}
+  .social-btn b{font-size:16px;line-height:1}
+  .social-btn:hover{transform:rotate(0) translate(-1px,-1px);box-shadow:6px 6px 0 rgba(0,0,0,.55)}
+  .social-btn.ig{background:linear-gradient(135deg,#ffdf54,#ff3d9a 48%,#754dff);color:#fff;text-shadow:1px 1px 0 var(--ink)}
+  .social-btn.fb{background:#36e0ff;color:#061018}
+  .social-btn.tt{background:#111;color:#fff;border-color:var(--cyan);box-shadow:4px 4px 0 var(--pink)}
+  @media (max-width:700px){
+    .case-row{display:block}
+    .social-rail{position:relative;top:auto;flex-direction:row;align-items:stretch;margin:0 0 14px}
+    .social-cap{display:none}.social-btn{flex:1;min-height:48px}
+  }
+
+  .story-modal{position:fixed;inset:0;z-index:130;background:rgba(4,6,10,.92);backdrop-filter:blur(8px);
+    display:none;align-items:center;justify-content:center;padding:18px}
+  .story-modal.on{display:flex}
+  .story-panel{width:min(1180px,100%);max-height:94vh;overflow:auto;background:linear-gradient(180deg,#141925,#080b10);
+    border:4px solid var(--ink);border-radius:8px;box-shadow:10px 10px 0 rgba(0,0,0,.65),0 22px 80px rgba(0,0,0,.55)}
+  .story-head{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:16px 18px;border-bottom:3px solid var(--ink);background:#0f141d}
+  .story-head .k{font-family:var(--tag);font-size:13px;color:var(--cyan)}
+  .story-head h2{font-family:var(--street);font-size:24px;margin:2px 0 0;color:var(--yellow);text-shadow:2px 2px 0 var(--ink)}
+  .story-close{width:42px;height:42px;border:3px solid var(--ink);border-radius:4px;background:var(--red);color:#fff;font-family:var(--street);box-shadow:3px 3px 0 var(--ink)}
+  .story-body{display:grid;grid-template-columns:minmax(280px,420px) minmax(0,1fr);gap:18px;padding:18px}
+  .story-preview{background:#05070b;border:3px solid var(--ink);border-radius:8px;padding:10px;box-shadow:5px 5px 0 rgba(0,0,0,.5)}
+  #storyCanvas{display:block;width:100%;aspect-ratio:9/16;height:auto;background:#111;border-radius:4px}
+  .story-controls{display:flex;flex-direction:column;gap:14px;min-width:0}
+  .story-group{border:2px solid var(--line);border-radius:6px;padding:12px;background:rgba(255,255,255,.03)}
+  .story-label{font-family:var(--street);text-transform:uppercase;font-size:12px;color:var(--yellow);margin-bottom:9px;letter-spacing:.5px}
+  .story-pills{display:flex;gap:8px;flex-wrap:wrap}
+  .story-pill{font-family:var(--street);font-size:11px;text-transform:uppercase;border:2px solid var(--ink);border-radius:4px;
+    background:var(--paper);color:var(--ink);padding:8px 10px;box-shadow:2px 2px 0 rgba(0,0,0,.55)}
+  .story-pill.on{background:var(--pink);color:#fff}
+  .story-field{display:grid;gap:6px;margin-top:10px}
+  .story-field span{font-family:var(--tag);font-size:13px;color:var(--dim)}
+  .story-field input,.story-field select{width:100%;background:var(--paper);color:#15110d;border:3px solid var(--ink);border-radius:3px;
+    padding:9px 11px;font-family:var(--mono);font-size:12px;box-shadow:3px 3px 0 rgba(0,0,0,.45)}
+  .story-actions{display:flex;gap:9px;flex-wrap:wrap}
+  .story-actions .btn{font-size:11px;padding:9px 12px}
+  .story-status{min-height:20px;color:var(--green);font-family:var(--tag);font-size:14px}
+  .story-status.bad{color:var(--red)}
+  @media (max-width:860px){.story-body{grid-template-columns:1fr}.story-preview{max-width:390px;margin:0 auto;width:100%}}
+
   /* ---------- pinned, taped cases ---------- */
   .sleeve{aspect-ratio:1/1;perspective:1300px;position:relative;transition:transform .18s ease}
   .sleeve:hover{transform:scale(1.03);z-index:6}
@@ -330,7 +377,15 @@
       </div>
     </div>
     <div class="stencil"><b>THE CASES</b> <em>flip the pages — tap a cover to open</em></div>
-    <div class="spread"><div class="grid" id="grid"></div></div>
+    <div class="case-row">
+      <div class="social-rail" aria-label="Make social story">
+        <div class="social-cap">make story</div>
+        <button class="social-btn ig" data-story-open="instagram" title="Make an Instagram Story"><b>IG</b><span>Story</span></button>
+        <button class="social-btn fb" data-story-open="facebook" title="Make a Facebook Story"><b>f</b><span>Story</span></button>
+        <button class="social-btn tt" data-story-open="tiktok" title="Make a TikTok Story"><b>♪</b><span>TikTok</span></button>
+      </div>
+      <div class="spread"><div class="grid" id="grid"></div></div>
+    </div>
   </div>
 
   <aside class="side">
@@ -354,6 +409,49 @@
     <div class="pbtns">
       <a class="btn" id="npOpen" target="_blank" rel="noopener">Open in Spotify</a>
       <button class="btn ghost" id="npClose">Close</button>
+    </div>
+  </div>
+</div>
+<div class="story-modal" id="storyModal" aria-modal="true" role="dialog" aria-labelledby="storyTitle">
+  <div class="story-panel">
+    <div class="story-head">
+      <div><div class="k">animated social card</div><h2 id="storyTitle">Make Story</h2></div>
+      <button class="story-close" id="storyClose" aria-label="Close story maker">✕</button>
+    </div>
+    <div class="story-body">
+      <div class="story-preview"><canvas id="storyCanvas" width="1080" height="1920"></canvas></div>
+      <div class="story-controls">
+        <div class="story-group">
+          <div class="story-label">Platform</div>
+          <div class="story-pills">
+            <button class="story-pill" data-story-platform="instagram">Instagram</button>
+            <button class="story-pill" data-story-platform="facebook">Facebook</button>
+            <button class="story-pill" data-story-platform="tiktok">TikTok</button>
+          </div>
+        </div>
+        <div class="story-group">
+          <div class="story-label">Template</div>
+          <div class="story-pills">
+            <button class="story-pill" data-story-template="top3">My Top 3</button>
+            <button class="story-pill" data-story-template="now">Now Playing</button>
+            <button class="story-pill" data-story-template="rate">Rate My Taste</button>
+            <button class="story-pill" data-story-template="wall">Case Wall</button>
+          </div>
+          <label class="story-field"><span>Album for Now Playing</span><select id="storyAlbum"></select></label>
+          <label class="story-field"><span>Headline</span><input id="storyHeadline" maxlength="44"></label>
+          <label class="story-field"><span>Subtitle</span><input id="storySubtitle" maxlength="64"></label>
+        </div>
+        <div class="story-group">
+          <div class="story-label">Export</div>
+          <div class="story-actions">
+            <button class="btn" id="storyDownload">Download PNG</button>
+            <button class="btn ghost" id="storyDownloadAnim">Download Animated</button>
+            <button class="btn ghost" id="storyCopy">Copy Link</button>
+            <button class="btn ghost" id="storyShare">Share</button>
+          </div>
+        </div>
+        <div class="story-status" id="storyStatus"></div>
+      </div>
     </div>
   </div>
 </div>
@@ -615,6 +713,313 @@ async function importData(file){
   }catch(e){ flash("Couldn't read that file — use a CD Case export (.json)."); }
 }
 
+/* ---------------- social story maker ---------------- */
+const STORY_W=1080, STORY_H=1920, STORY_MS=5200;
+const storyCanvas=$("#storyCanvas"), storyCtx=storyCanvas.getContext("2d");
+const storyPlatformDefaults={
+  instagram:{template:"top3",headline:"my heavy rotation",subtitle:"made with CD Case"},
+  facebook:{template:"rate",headline:"rate my taste / 10",subtitle:"made with CD Case"},
+  tiktok:{template:"now",headline:"now playing",subtitle:"scan to listen"}
+};
+const storyTemplateDefaults={
+  top3:{headline:"my heavy rotation",subtitle:"made with CD Case"},
+  now:{headline:"now playing",subtitle:"scan to listen"},
+  rate:{headline:"rate my taste / 10",subtitle:"reply with your score"},
+  wall:{headline:"CD case wall",subtitle:"made with CD Case"}
+};
+let storyState={platform:"instagram",template:"top3",headline:"my heavy rotation",subtitle:"made with CD Case",albumId:""};
+let storySharedAlbums=null, storyLoop=0, storyImageCache=new Map(), storyImages=new Map(), storyQr=null, storyAssetNote="";
+
+function storyStatus(msg,bad=false){ const s=$("#storyStatus"); s.textContent=msg||""; s.classList.toggle("bad",!!bad); }
+function storyAlbumKey(a,i){ return a.id||a.storyId||("story-"+i); }
+function storyListenUrl(a){ return (a&&((a.links&&a.links.spotify)||a.pageUrl||firstLink(a)||a.url))||location.href.split("#")[0]; }
+function storySourceAlbums(){ return storySharedAlbums||state.albums; }
+function storyAlbumPayload(a,i){ return {id:storyAlbumKey(a,i),title:a.title||"Untitled",artist:a.artist||"",cover:a.cover||"",links:a.links||{},pageUrl:a.pageUrl||a.url||"",url:a.url||a.pageUrl||""}; }
+function storyRelevantAlbums(){
+  const src=storySourceAlbums();
+  if(storyState.template==="now"){
+    return [getStorySelectedAlbum()].filter(Boolean);
+  }
+  if(storyState.template==="wall") return src.slice(0,9);
+  if(storySharedAlbums) return src.slice(0,3);
+  const pinned=state.top3.map(albumById).filter(Boolean);
+  return (pinned.length?pinned:src).slice(0,3);
+}
+function getStorySelectedAlbum(){
+  const src=storySourceAlbums();
+  return src.find((a,i)=>storyAlbumKey(a,i)===storyState.albumId)||src[0]||null;
+}
+function storyHasEnough(){
+  const src=storySourceAlbums();
+  if(!src.length){ storyStatus("Add at least one album first.",true); return false; }
+  if((storyState.template==="top3"||storyState.template==="rate")&&!storySharedAlbums&&state.top3.length<3){
+    storyStatus("Pin 3 albums for the full Top 3 story. Preview is using saved cases.",true);
+  } else if(storyAssetNote) storyStatus(storyAssetNote,false);
+  else storyStatus("Story ready.");
+  return true;
+}
+function updateStoryAlbumSelect(){
+  const sel=$("#storyAlbum"), src=storySourceAlbums();
+  sel.innerHTML="";
+  src.forEach((a,i)=>{
+    const o=document.createElement("option");
+    o.value=storyAlbumKey(a,i);
+    o.textContent=(a.title||"Untitled")+(a.artist?" — "+a.artist:"");
+    sel.appendChild(o);
+  });
+  if(!storyState.albumId&&src[0]) storyState.albumId=storyAlbumKey(src[0],0);
+  sel.value=storyState.albumId;
+}
+function updateStoryControls(){
+  document.querySelectorAll("[data-story-platform]").forEach(b=>b.classList.toggle("on",b.dataset.storyPlatform===storyState.platform));
+  document.querySelectorAll("[data-story-template]").forEach(b=>b.classList.toggle("on",b.dataset.storyTemplate===storyState.template));
+  $("#storyHeadline").value=storyState.headline;
+  $("#storySubtitle").value=storyState.subtitle;
+  updateStoryAlbumSelect();
+}
+function openStory(platform,payload){
+  if(payload){
+    storySharedAlbums=(payload.albums||[]).map((a,i)=>storyAlbumPayload(a,i));
+    storyState={
+      platform:payload.platform||"instagram",
+      template:payload.template||"top3",
+      headline:payload.headline||storyTemplateDefaults[payload.template||"top3"].headline,
+      subtitle:payload.subtitle||storyTemplateDefaults[payload.template||"top3"].subtitle,
+      albumId:payload.albumId||((storySharedAlbums[0]&&storyAlbumKey(storySharedAlbums[0],0))||"")
+    };
+  } else {
+    storySharedAlbums=null;
+    const d=storyPlatformDefaults[platform]||storyPlatformDefaults.instagram;
+    storyState={platform,template:d.template,headline:d.headline,subtitle:d.subtitle,albumId:storyState.albumId||""};
+  }
+  if(!storySourceAlbums().length){ flash("Add an album before making a story."); return; }
+  $("#storyModal").classList.add("on");
+  updateStoryControls();
+  prepareStoryAssets().then(()=>{ startStoryLoop(); });
+}
+function closeStory(){
+  $("#storyModal").classList.remove("on");
+  cancelAnimationFrame(storyLoop);
+  storyLoop=0;
+}
+function setStoryTemplate(t){
+  storyState.template=t;
+  const d=storyTemplateDefaults[t];
+  storyState.headline=d.headline; storyState.subtitle=d.subtitle;
+  updateStoryControls(); scheduleStoryPrep();
+}
+function setStoryPlatform(p){
+  storyState.platform=p;
+  updateStoryControls(); scheduleStoryPrep();
+}
+let storyPrepTimer=0;
+function scheduleStoryPrep(){
+  clearTimeout(storyPrepTimer);
+  storyPrepTimer=setTimeout(()=>prepareStoryAssets().then(()=>renderStoryFrame(performance.now())),120);
+}
+async function loadStoryImage(url){
+  if(!url) return null;
+  if(storyImageCache.has(url)) return storyImageCache.get(url);
+  const p=new Promise(resolve=>{
+    const img=new Image();
+    img.crossOrigin="anonymous";
+    img.onload=()=>resolve(img);
+    img.onerror=()=>resolve(null);
+    img.src=url;
+  });
+  storyImageCache.set(url,p);
+  return p;
+}
+async function makeStoryQr(text,size){
+  if(!text||typeof QRCode==="undefined") return null;
+  const host=document.createElement("div");
+  host.style.cssText="position:fixed;left:-9999px;top:-9999px;width:"+size+"px;height:"+size+"px;background:#fff";
+  document.body.appendChild(host);
+  try{
+    new QRCode(host,{text,width:size,height:size,correctLevel:QRCode.CorrectLevel.H,colorDark:"#000",colorLight:"#fff"});
+    await new Promise(r=>setTimeout(r,60));
+    const src=host.querySelector("canvas");
+    if(src){ const c=document.createElement("canvas"); c.width=size; c.height=size; c.getContext("2d").drawImage(src,0,0,size,size); return c; }
+  }catch(e){}
+  finally{ host.remove(); }
+  return null;
+}
+async function prepareStoryAssets(){
+  const albums=storyRelevantAlbums();
+  storyImages=new Map(); storyAssetNote="";
+  let misses=0;
+  await Promise.all(albums.map(async (a,i)=>{
+    const img=await loadStoryImage(a.cover||"");
+    if(img) storyImages.set(storyAlbumKey(a,i),img); else if(a.cover) misses++;
+  }));
+  const selected=getStorySelectedAlbum();
+  storyQr=await makeStoryQr(storyListenUrl(selected),220);
+  if(misses) storyAssetNote="Some covers use fallback art because their image host blocks story export.";
+  storyHasEnough();
+}
+function startStoryLoop(){
+  cancelAnimationFrame(storyLoop);
+  const tick=t=>{ renderStoryFrame(t); if($("#storyModal").classList.contains("on")) storyLoop=requestAnimationFrame(tick); };
+  storyLoop=requestAnimationFrame(tick);
+}
+function rr(x,y,w,h,r){ storyCtx.beginPath(); if(storyCtx.roundRect) storyCtx.roundRect(x,y,w,h,r); else storyCtx.rect(x,y,w,h); }
+function drawText(ctx,text,x,y,max,lh,font,fill,align="left"){
+  ctx.save(); ctx.font=font; ctx.fillStyle=fill; ctx.textAlign=align; ctx.textBaseline="top";
+  const words=String(text||"").split(/\s+/), lines=[]; let line="";
+  words.forEach(w=>{ const test=line?line+" "+w:w; if(ctx.measureText(test).width>max&&line){lines.push(line);line=w;} else line=test; });
+  if(line) lines.push(line);
+  lines.slice(0,4).forEach((l,i)=>ctx.fillText(l,x,y+i*lh));
+  ctx.restore();
+}
+function drawBg(ctx,t){
+  const g=ctx.createLinearGradient(0,0,STORY_W,STORY_H);
+  g.addColorStop(0,"#070a10"); g.addColorStop(.45,"#151b28"); g.addColorStop(1,"#06070b");
+  ctx.fillStyle=g; ctx.fillRect(0,0,STORY_W,STORY_H);
+  const colors=["#ff3d9a","#36e0ff","#34efb0","#b14bff"];
+  colors.forEach((c,i)=>{ ctx.globalAlpha=.15; ctx.fillStyle=c; ctx.beginPath();
+    ctx.arc(160+i*260+Math.sin(t/900+i)*60,180+i*280+Math.cos(t/1100+i)*70,220-i*20,0,Math.PI*2); ctx.fill(); });
+  ctx.globalAlpha=.06; ctx.fillStyle="#fff";
+  for(let i=0;i<90;i++){ const x=(i*127+t*.025)%STORY_W, y=(i*211+t*.018)%STORY_H; ctx.fillRect(x,y,2,2); }
+  ctx.globalAlpha=1;
+}
+function drawSticker(ctx,text,x,y,color,angle=0){
+  ctx.save(); ctx.translate(x,y); ctx.rotate(angle);
+  ctx.font='700 34px "Permanent Marker", cursive'; const w=ctx.measureText(text).width+38;
+  ctx.fillStyle=color; ctx.strokeStyle="#06080c"; ctx.lineWidth=7; rr(-w/2,-31,w,62,5); ctx.fill(); ctx.stroke();
+  ctx.fillStyle=color==="#111"?"#34efb0":"#06080c"; ctx.textAlign="center"; ctx.textBaseline="middle"; ctx.fillText(text,0,2);
+  ctx.restore();
+}
+function albumColor(a){ let n=0; for(const ch of (a.title||"CD")) n=(n*31+ch.charCodeAt(0))%360; return `hsl(${n},76%,54%)`; }
+function drawCover(ctx,a,x,y,w,h,t,angle=0){
+  ctx.save(); ctx.translate(x+w/2,y+h/2); ctx.rotate(angle); ctx.translate(-w/2,-h/2);
+  ctx.shadowColor="rgba(0,0,0,.45)"; ctx.shadowBlur=28; ctx.shadowOffsetY=18;
+  ctx.fillStyle="#0b0e15"; rr(0,0,w,h,14); ctx.fill(); ctx.shadowBlur=0;
+  const key=storyAlbumKey(a,storySourceAlbums().indexOf(a)), img=storyImages.get(key);
+  if(img){ ctx.save(); rr(0,0,w,h,14); ctx.clip(); ctx.drawImage(img,0,0,w,h); ctx.restore(); }
+  else{
+    const g=ctx.createLinearGradient(0,0,w,h); g.addColorStop(0,albumColor(a)); g.addColorStop(1,"#111622");
+    ctx.fillStyle=g; rr(0,0,w,h,14); ctx.fill();
+    ctx.fillStyle="rgba(255,255,255,.15)"; ctx.beginPath(); ctx.arc(w*.72,h*.24,w*.25,0,Math.PI*2); ctx.fill();
+    ctx.fillStyle="#fff"; ctx.font='700 54px "Bungee", sans-serif'; ctx.textAlign="center"; ctx.textBaseline="middle";
+    ctx.fillText((a.title||"CD").slice(0,2).toUpperCase(),w/2,h/2);
+  }
+  ctx.strokeStyle="#06080c"; ctx.lineWidth=9; rr(0,0,w,h,14); ctx.stroke();
+  ctx.fillStyle="rgba(0,0,0,.66)"; ctx.fillRect(0,h-118,w,118);
+  drawText(ctx,a.title||"Untitled",24,h-102,w-48,34,'700 30px "Bungee", sans-serif',"#fff");
+  if(a.artist) drawText(ctx,a.artist,24,h-44,w-48,24,'28px "Permanent Marker", cursive',"#36e0ff");
+  ctx.restore();
+}
+function drawFooter(ctx){
+  ctx.fillStyle="#eaf0f7"; ctx.font='700 28px "Space Mono", monospace'; ctx.textAlign="center";
+  ctx.fillText((storyState.platform||"story").toUpperCase()+" STORY · MADE WITH CD CASE",STORY_W/2,STORY_H-86);
+}
+function drawTop3(ctx,t,rate=false){
+  const albums=storyRelevantAlbums();
+  drawSticker(ctx,rate?"RATE MY TASTE / 10":storyState.headline,STORY_W/2,170,rate?"#36e0ff":"#ff3d9a",-.055+Math.sin(t/900)*.01);
+  albums.forEach((a,i)=>drawCover(ctx,a,162+i*38,330+i*365+Math.sin(t/520+i)*10,620,330,t,(i-1)*.055));
+  if(rate) drawText(ctx,storyState.subtitle,STORY_W/2,1540,760,54,'68px "Permanent Marker", cursive',"#34efb0","center");
+  else drawText(ctx,storyState.subtitle,STORY_W/2,1580,760,42,'48px "Permanent Marker", cursive',"#36e0ff","center");
+}
+function drawNow(ctx,t){
+  const a=getStorySelectedAlbum()||storyRelevantAlbums()[0];
+  drawSticker(ctx,storyState.headline,STORY_W/2,150,"#36e0ff",.04);
+  drawCover(ctx,a,155,310+Math.sin(t/600)*15,770,770,t,Math.sin(t/1300)*.035);
+  drawText(ctx,a.title||"Untitled",STORY_W/2,1135,820,68,'78px "Bungee", sans-serif',"#fff","center");
+  drawText(ctx,a.artist||storyState.subtitle,STORY_W/2,1288,820,46,'54px "Permanent Marker", cursive',"#ff3d9a","center");
+  ctx.fillStyle="#fff"; rr(392,1432,296,296,10); ctx.fill(); ctx.strokeStyle="#06080c"; ctx.lineWidth=8; ctx.stroke();
+  if(storyQr) ctx.drawImage(storyQr,430,1470,220,220);
+  drawText(ctx,"scan to listen",STORY_W/2,1740,600,34,'34px "Space Mono", monospace',"#34efb0","center");
+}
+function drawWall(ctx,t){
+  const albums=storyRelevantAlbums();
+  drawSticker(ctx,storyState.headline,STORY_W/2,145,"#34efb0",-0.035);
+  const w=250,g=35,startX=115,startY=330;
+  albums.forEach((a,i)=>{ const col=i%3,row=Math.floor(i/3); drawCover(ctx,a,startX+col*(w+g),startY+row*(w+g)+Math.sin(t/700+i)*8,w,w,t,(i%2?1:-1)*.025); });
+  drawText(ctx,storyState.subtitle,STORY_W/2,1515,760,50,'58px "Permanent Marker", cursive',"#ff3d9a","center");
+}
+function renderStoryFrame(ms){
+  const ctx=storyCtx, t=ms||0;
+  drawBg(ctx,t);
+  ctx.save();
+  if(storyState.template==="now") drawNow(ctx,t);
+  else if(storyState.template==="rate") drawTop3(ctx,t,true);
+  else if(storyState.template==="wall") drawWall(ctx,t);
+  else drawTop3(ctx,t,false);
+  ctx.restore();
+  drawFooter(ctx);
+}
+function encodeStoryPayload(payload){
+  const json=JSON.stringify(payload), bytes=new TextEncoder().encode(json); let bin="";
+  bytes.forEach(b=>bin+=String.fromCharCode(b));
+  return btoa(bin).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,"");
+}
+function decodeStoryPayload(s){
+  const b64=s.replace(/-/g,"+").replace(/_/g,"/")+"===".slice((s.length+3)%4);
+  const bin=atob(b64), bytes=new Uint8Array(bin.length);
+  for(let i=0;i<bin.length;i++) bytes[i]=bin.charCodeAt(i);
+  return JSON.parse(new TextDecoder().decode(bytes));
+}
+function storyPayload(){
+  const albums=storyRelevantAlbums().map(storyAlbumPayload);
+  return {platform:storyState.platform,template:storyState.template,headline:storyState.headline,subtitle:storyState.subtitle,albumId:storyState.albumId,albums};
+}
+function storyShareUrl(){
+  return location.origin+location.pathname+"#story="+encodeStoryPayload(storyPayload());
+}
+async function copyStoryLink(){
+  const url=storyShareUrl();
+  try{ await navigator.clipboard.writeText(url); storyStatus("Share link copied."); }
+  catch(e){ storyStatus("Copy failed. Use this link: "+url,true); }
+}
+function downloadBlob(blob,name){
+  const a=document.createElement("a"), url=URL.createObjectURL(blob);
+  a.href=url; a.download=name; document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),3000);
+}
+function storyPngBlob(){
+  renderStoryFrame(performance.now());
+  return new Promise((resolve,reject)=>{
+    try{ storyCanvas.toBlob(b=>b?resolve(b):reject(new Error("png")),"image/png"); }
+    catch(e){ reject(e); }
+  });
+}
+async function downloadStoryPng(){
+  try{ downloadBlob(await storyPngBlob(),"cd-case-story.png"); storyStatus("Downloaded 1080x1920 PNG."); }
+  catch(e){ storyStatus("Could not export PNG. Some album art may block canvas export.",true); }
+}
+async function downloadStoryAnimation(){
+  if(!storyCanvas.captureStream||typeof MediaRecorder==="undefined"){ storyStatus("Animated export is not supported here. Downloading PNG instead.",true); return downloadStoryPng(); }
+  const mime=MediaRecorder.isTypeSupported("video/webm;codecs=vp9")?"video/webm;codecs=vp9":"video/webm";
+  const stream=storyCanvas.captureStream(30), rec=new MediaRecorder(stream,{mimeType:mime}), chunks=[];
+  rec.ondataavailable=e=>{ if(e.data&&e.data.size) chunks.push(e.data); };
+  const done=new Promise(resolve=>rec.onstop=resolve);
+  rec.start(); storyStatus("Recording animated story...");
+  setTimeout(()=>{ try{ rec.stop(); }catch(e){} stream.getTracks().forEach(tr=>tr.stop()); },STORY_MS);
+  await done;
+  downloadBlob(new Blob(chunks,{type:mime}),"cd-case-story.webm");
+  storyStatus("Downloaded animated WebM story.");
+}
+async function shareStory(){
+  const url=storyShareUrl();
+  try{
+    const blob=await storyPngBlob();
+    const file=new File([blob],"cd-case-story.png",{type:"image/png"});
+    if(navigator.canShare&&navigator.canShare({files:[file]})){
+      await navigator.share({files:[file],title:"CD Case Story",text:"Made with CD Case"});
+      storyStatus("Shared story.");
+    } else if(navigator.share){
+      await navigator.share({title:"CD Case Story",text:"Made with CD Case",url});
+      storyStatus("Shared link.");
+    } else { await copyStoryLink(); downloadBlob(blob,"cd-case-story.png"); }
+  }catch(e){ await copyStoryLink(); storyStatus("Share was not available, so the link was copied."); }
+}
+function loadStoryFromHash(){
+  const m=location.hash.match(/^#story=([^&]+)/);
+  if(!m) return false;
+  try{ openStory("instagram",decodeStoryPayload(m[1])); return true; }
+  catch(e){ flash("That story link could not be opened."); return false; }
+}
+
 /* ---------------- wire up ---------------- */
 $("#addBtn").addEventListener("click",addAlbum);
 $("#link").addEventListener("keydown",e=>{ if(e.key==="Enter") addAlbum(); });
@@ -626,6 +1031,18 @@ $("#qrtarget").addEventListener("change",e=>{ qrTarget=e.target.value; renderBin
 $("#exportBtn").addEventListener("click",exportData);
 $("#importBtn").addEventListener("click",()=>$("#importFile").click());
 $("#importFile").addEventListener("change",e=>{ if(e.target.files[0]) importData(e.target.files[0]); e.target.value=""; });
+document.querySelectorAll("[data-story-open]").forEach(b=>b.addEventListener("click",()=>openStory(b.dataset.storyOpen)));
+$("#storyClose").addEventListener("click",closeStory);
+$("#storyModal").addEventListener("click",e=>{ if(e.target.id==="storyModal") closeStory(); });
+document.querySelectorAll("[data-story-template]").forEach(b=>b.addEventListener("click",()=>setStoryTemplate(b.dataset.storyTemplate)));
+document.querySelectorAll("[data-story-platform]").forEach(b=>b.addEventListener("click",()=>setStoryPlatform(b.dataset.storyPlatform)));
+$("#storyAlbum").addEventListener("change",e=>{ storyState.albumId=e.target.value; scheduleStoryPrep(); });
+$("#storyHeadline").addEventListener("input",e=>{ storyState.headline=e.target.value; renderStoryFrame(performance.now()); });
+$("#storySubtitle").addEventListener("input",e=>{ storyState.subtitle=e.target.value; renderStoryFrame(performance.now()); });
+$("#storyDownload").addEventListener("click",downloadStoryPng);
+$("#storyDownloadAnim").addEventListener("click",downloadStoryAnimation);
+$("#storyCopy").addEventListener("click",copyStoryLink);
+$("#storyShare").addEventListener("click",shareStory);
 // top3 panel delegation
 $("#top3").addEventListener("click",e=>{
   const b=e.target.closest("button"); if(!b)return;
@@ -652,6 +1069,7 @@ addEventListener("beforeunload",()=>{ try{ if(useLS) localStorage.setItem(KEY,JS
   };
   document.documentElement.style.setProperty("--puck",$("#size").value);
   renderAll();
+  loadStoryFromHash();
 })();
 </script>
 </html>

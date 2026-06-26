@@ -31,4 +31,8 @@ CD Case backup exports include album data and Top 3 pins only.
 
 Do not upload browser-exported backup JSON files unless the saved album list is intentionally public.
 
+Story share links encode the selected story data in the URL hash. They can include album titles, artists, cover image URLs, and listen links, but not account tokens or browser storage.
+
+The social story feature does not connect to Instagram, Facebook, TikTok, or Spotify APIs and does not require developer keys.
+
 Knoll does not upload images. It processes images locally in the browser and generates local exports from the currently loaded image.
