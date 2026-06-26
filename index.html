@@ -150,10 +150,19 @@
   .social-btn.ig{background:linear-gradient(135deg,#ffdf54,#ff3d9a 48%,#754dff);color:#fff;text-shadow:1px 1px 0 var(--ink)}
   .social-btn.fb{background:#36e0ff;color:#061018}
   .social-btn.tt{background:#111;color:#fff;border-color:var(--cyan);box-shadow:4px 4px 0 var(--pink)}
+  .social-btn.snap{background:#fffc00;color:#06080c}
+  .social-btn.bs{background:#1689ff;color:#fff;text-shadow:1px 1px 0 var(--ink)}
+  .social-btn.rd{background:#ff4500;color:#fff;text-shadow:1px 1px 0 var(--ink)}
+  .social-btn.dc{background:#5865f2;color:#fff;text-shadow:1px 1px 0 var(--ink)}
+  .social-btn.pin{background:#e60023;color:#fff;text-shadow:1px 1px 0 var(--ink)}
+  .social-bottom{grid-column:2;display:flex;gap:9px;flex-wrap:wrap;margin-top:14px}
+  .social-bottom .social-btn{min-height:48px;min-width:116px;flex:1;flex-direction:row}
+  .social-bottom .social-btn b{font-size:15px}
   @media (max-width:700px){
     .case-row{display:block}
-    .social-rail{position:relative;top:auto;flex-direction:row;align-items:stretch;margin:0 0 14px}
-    .social-cap{display:none}.social-btn{flex:1;min-height:48px}
+    .social-rail{position:relative;top:auto;flex-direction:row;align-items:stretch;margin:0 0 14px;flex-wrap:wrap}
+    .social-cap{display:none}.social-btn{flex:1 1 60px;min-height:48px}
+    .social-spacer{display:none}.social-bottom{display:flex;margin-top:12px}.social-bottom .social-btn{min-width:96px}
   }
 
   .story-modal{position:fixed;inset:0;z-index:130;background:rgba(4,6,10,.92);backdrop-filter:blur(8px);
@@ -383,8 +392,16 @@
         <button class="social-btn ig" data-story-open="instagram" title="Make an Instagram Story"><b>IG</b><span>Story</span></button>
         <button class="social-btn fb" data-story-open="facebook" title="Make a Facebook Story"><b>f</b><span>Story</span></button>
         <button class="social-btn tt" data-story-open="tiktok" title="Make a TikTok Story"><b>♪</b><span>TikTok</span></button>
+        <button class="social-btn snap" data-story-open="snapchat" title="Make a Snapchat Story"><b>SC</b><span>Snap</span></button>
+        <button class="social-btn bs" data-story-open="bluesky" title="Make a Bluesky story card"><b>BS</b><span>Sky</span></button>
       </div>
       <div class="spread"><div class="grid" id="grid"></div></div>
+      <div class="social-spacer" aria-hidden="true"></div>
+      <div class="social-bottom" aria-label="Make community share card">
+        <button class="social-btn rd" data-story-open="reddit" title="Make a Reddit share card"><b>r/</b><span>Reddit</span></button>
+        <button class="social-btn dc" data-story-open="discord" title="Make a Discord share card"><b>DC</b><span>Discord</span></button>
+        <button class="social-btn pin" data-story-open="pinterest" title="Make a Pinterest pin"><b>P</b><span>Pinterest</span></button>
+      </div>
     </div>
   </div>
 
@@ -427,6 +444,11 @@
             <button class="story-pill" data-story-platform="instagram">Instagram</button>
             <button class="story-pill" data-story-platform="facebook">Facebook</button>
             <button class="story-pill" data-story-platform="tiktok">TikTok</button>
+            <button class="story-pill" data-story-platform="snapchat">Snapchat</button>
+            <button class="story-pill" data-story-platform="bluesky">Bluesky</button>
+            <button class="story-pill" data-story-platform="reddit">Reddit</button>
+            <button class="story-pill" data-story-platform="discord">Discord</button>
+            <button class="story-pill" data-story-platform="pinterest">Pinterest</button>
           </div>
         </div>
         <div class="story-group">
@@ -719,7 +741,12 @@ const storyCanvas=$("#storyCanvas"), storyCtx=storyCanvas.getContext("2d");
 const storyPlatformDefaults={
   instagram:{template:"top3",headline:"my heavy rotation",subtitle:"made with CD Case"},
   facebook:{template:"rate",headline:"rate my taste / 10",subtitle:"made with CD Case"},
-  tiktok:{template:"now",headline:"now playing",subtitle:"scan to listen"}
+  tiktok:{template:"now",headline:"now playing",subtitle:"scan to listen"},
+  snapchat:{template:"now",headline:"snap this CD case",subtitle:"scan to listen"},
+  bluesky:{template:"top3",headline:"my CD case rotation",subtitle:"made with CD Case"},
+  reddit:{template:"rate",headline:"rate my taste / 10",subtitle:"drop the score in replies"},
+  discord:{template:"wall",headline:"CD case wall",subtitle:"send this to the server"},
+  pinterest:{template:"wall",headline:"CD case inspo",subtitle:"save this music board"}
 };
 const storyTemplateDefaults={
   top3:{headline:"my heavy rotation",subtitle:"made with CD Case"},
